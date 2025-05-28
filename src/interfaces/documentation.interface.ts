@@ -204,6 +204,26 @@ export interface EndpointConfig {
     error: string;
     message: string;
   }>;
+  // Enhanced fields for complex APIs
+  parameters?: Array<{
+    name: string;
+    in: string;
+    required: boolean;
+    description: string;
+    type: string;
+    example: any;
+  }>;
+  requestExamples?: Array<{
+    name: string;
+    summary: string;
+    value: any;
+  }>;
+  responseExamples?: Array<{
+    name: string;
+    summary: string;
+    status: number;
+    value: any;
+  }>;
 }
 
 export interface ModuleConfig {
