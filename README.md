@@ -1,12 +1,13 @@
 # @kodesonik/zedoc
 
-A NestJS library for generating beautiful API documentation with Swagger integration, comprehensive theming, sidebar navigation, and interactive "Try It Out" functionality.
+A NestJS library for generating beautiful API documentation with Swagger integration, comprehensive theming, sidebar navigation, font customization, and interactive "Try It Out" functionality.
 
 ## Features
 
 - 🚀 Easy integration with NestJS applications
 - 📚 Beautiful HTML documentation generation with Swagger integration
 - 🎨 Comprehensive theming system with 4 preset themes and full customization
+- 🔤 Advanced typography system with 3 font size presets and 3 font families
 - 🧭 Advanced sidebar navigation with search and filtering
 - 🔧 Interactive "Try It Out" panel for API testing
 - 📱 Fully responsive design for all devices
@@ -23,7 +24,7 @@ npm install @kodesonik/zedoc
 
 ## Quick Start
 
-### 1. Import the module with Swagger integration
+### 1. Import the module with comprehensive configuration
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -33,11 +34,15 @@ import { ZedocModule } from '@kodesonik/zedoc';
   imports: [
     ZedocModule.forRoot({
       title: 'My API Documentation',
-      description: 'Comprehensive API documentation with sidebar navigation',
+      description: 'Comprehensive API documentation with all features',
       version: '1.0.0',
       theme: {
         preset: 'postman',
-        mode: 'light'
+        mode: 'light',
+        fonts: {
+          size: 'md',
+          family: 'inter'
+        }
       },
       sidebar: {
         position: 'left',
@@ -171,6 +176,55 @@ theme: {
 }
 ```
 
+## 🔤 Font Configuration
+
+### Font Size Presets
+
+Choose from 3 carefully crafted size scales:
+
+```typescript
+// Small - Compact display
+fonts: { size: 'sm' }
+
+// Medium - Balanced (default)
+fonts: { size: 'md' }
+
+// Large - Accessibility focused
+fonts: { size: 'lg' }
+```
+
+### Font Family Options
+
+Select from 3 distinct font families:
+
+```typescript
+// Inter - Modern UI font
+fonts: { family: 'inter' }
+
+// Roboto - Google's signature font
+fonts: { family: 'roboto' }
+
+// System - Native OS fonts
+fonts: { family: 'system' }
+```
+
+### Complete Font Configuration
+
+```typescript
+theme: {
+  fonts: {
+    size: 'md',           // 'sm' | 'md' | 'lg' | 'custom'
+    family: 'inter',      // 'inter' | 'roboto' | 'system' | 'custom'
+    customSizes: {        // Optional custom sizes
+      base: '1.125rem',
+      lg: '1.375rem',
+      xl: '1.75rem'
+    },
+    customFamily: '"Poppins", sans-serif'  // Optional custom font
+  }
+}
+```
+
 ## 🧭 Sidebar Configuration
 
 ### Basic Sidebar Setup
@@ -243,6 +297,10 @@ ZedocModule.forRoot({
       primary: '#ff6c37',
       secondary: '#4a5568',
       success: '#48bb78'
+    },
+    fonts: {
+      size: 'md',
+      family: 'inter'
     }
   },
   sidebar: {
@@ -274,7 +332,11 @@ ZedocModule.forRootAsync({
       version: configService.get('API_VERSION'),
       theme: {
         preset: 'postman',
-        mode: isDevelopment ? 'light' : 'dark'
+        mode: isDevelopment ? 'light' : 'dark',
+        fonts: {
+          size: isDevelopment ? 'lg' : 'md',  // Larger fonts in development
+          family: 'inter'
+        }
       },
       sidebar: {
         position: 'left',
@@ -293,6 +355,7 @@ ZedocModule.forRootAsync({
 
 - **[Theme Configuration Guide](THEME_EXAMPLES.md)** - Complete theming documentation
 - **[Sidebar Configuration Guide](SIDEBAR_CONFIGURATION.md)** - Comprehensive sidebar setup
+- **[Font Configuration Guide](FONT_CONFIGURATION.md)** - Typography and font customization
 
 ## API Reference
 
@@ -323,6 +386,18 @@ interface ThemeConfig {
   preset?: 'basic' | 'postman' | 'insomnia' | 'swagger' | 'custom';
   mode?: 'light' | 'dark';
   colors?: ThemeColors;
+  fonts?: FontConfig;
+}
+```
+
+#### FontConfig
+
+```typescript
+interface FontConfig {
+  size?: 'sm' | 'md' | 'lg' | 'custom';
+  family?: 'inter' | 'roboto' | 'system' | 'custom';
+  customSizes?: FontSizes;
+  customFamily?: string;
 }
 ```
 
@@ -366,6 +441,19 @@ class ThemeService {
 }
 ```
 
+#### FontService
+
+Service for managing typography and font configurations.
+
+```typescript
+class FontService {
+  getResolvedFontConfig(fontConfig?: FontConfig): Required<FontConfig>;
+  generateFontCSS(fontConfig?: FontConfig): string;
+  generateResponsiveFontCSS(fontConfig?: FontConfig): string;
+  getFontClasses(fontConfig?: FontConfig): Record<string, string>;
+}
+```
+
 #### SidebarService
 
 Service for managing sidebar functionality and layout.
@@ -380,7 +468,7 @@ class SidebarService {
 
 ## Custom Templates
 
-You can customize the documentation appearance by providing your own Handlebars templates. The library provides several helpers for theme and sidebar integration.
+You can customize the documentation appearance by providing your own Handlebars templates. The library provides several helpers for theme, font, and sidebar integration.
 
 ### Available Handlebars Helpers
 
@@ -389,6 +477,11 @@ You can customize the documentation appearance by providing your own Handlebars 
 {{{themeCSS}}}
 {{{methodColors}}}
 {{themeClass 'body'}}
+
+<!-- Font helpers -->
+{{{fontCSS}}}
+{{{responsiveFontCSS}}}
+{{fontClass 'title'}}
 
 <!-- Sidebar helpers -->
 {{{sidebarHTML}}}

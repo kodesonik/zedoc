@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { DocumentationConfig, TemplateData, EndpointInfo, ParameterInfo, ResponseInfo } from '../interfaces/documentation.interface';
 import { ThemeService } from './theme.service';
 import { SidebarService } from './sidebar.service';
+import { FontService } from './font.service';
 import * as hbs from 'hbs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -14,6 +15,7 @@ export class DocumentationService {
     @Inject('DOCUMENTATION_CONFIG') config: DocumentationConfig,
     private readonly themeService: ThemeService,
     private readonly sidebarService: SidebarService,
+    private readonly fontService: FontService,
   ) {
     this.config = { ...this.config, ...config };
     this.setupHandlebars();
@@ -46,6 +48,20 @@ export class DocumentationService {
     
     hbs.registerHelper('methodColors', (context: any) => {
       return new hbs.SafeString(this.themeService.generateMethodColors(context.data.root.theme));
+    });
+
+    // Font-related helpers
+    hbs.registerHelper('fontCSS', (context: any) => {
+      return new hbs.SafeString(this.fontService.generateFontCSS(context.data.root.theme?.fonts));
+    });
+
+    hbs.registerHelper('responsiveFontCSS', (context: any) => {
+      return new hbs.SafeString(this.fontService.generateResponsiveFontCSS(context.data.root.theme?.fonts));
+    });
+
+    hbs.registerHelper('fontClass', (className: string, context: any) => {
+      const fontClasses = this.fontService.getFontClasses(context.data.root.theme?.fonts);
+      return fontClasses[className] || '';
     });
 
     // Sidebar-related helpers
@@ -240,6 +256,8 @@ export class DocumentationService {
     <title>{{title}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        {{{fontCSS}}}
+        {{{responsiveFontCSS}}}
         {{{themeCSS}}}
         {{{methodColors}}}
         {{{sidebarCSS}}}
@@ -257,12 +275,12 @@ export class DocumentationService {
     
     <div class="main-content container mx-auto px-4 py-8 max-w-6xl {{themeClass 'container'}}">
         <header class="mb-12 text-center">
-            <h1 class="text-5xl font-bold mb-4 {{themeClass 'header'}}">{{title}}</h1>
+            <h1 class="{{fontClass 'title'}} mb-4 {{themeClass 'header'}}">{{title}}</h1>
             {{#if description}}
-            <p class="text-xl mb-4 {{themeClass 'textSecondary'}}">{{description}}</p>
+            <p class="{{fontClass 'subtitle'}} mb-4 {{themeClass 'textSecondary'}}">{{description}}</p>
             {{/if}}
             {{#if version}}
-            <span class="inline-block bg-blue-500 text-white text-sm px-4 py-2 rounded-full font-medium">Version {{version}}</span>
+            <span class="inline-block bg-blue-500 text-white {{fontClass 'badge'}} px-4 py-2 rounded-full">Version {{version}}</span>
             {{/if}}
         </header>
 
@@ -271,26 +289,26 @@ export class DocumentationService {
             <div id="{{endpointId this}}" class="endpoint-card {{themeClass 'card'}} rounded-xl shadow-lg border overflow-hidden">
                 <div class="p-6">
                     <div class="flex items-center mb-6">
-                        <span class="inline-block px-4 py-2 text-sm font-bold rounded-lg method-{{lowercase method}}">
+                        <span class="inline-block px-4 py-2 {{fontClass 'badge'}} rounded-lg method-{{lowercase method}}">
                             {{method}}
                         </span>
-                        <code class="ml-4 text-lg font-mono px-3 py-1 rounded {{themeClass 'surface'}} {{themeClass 'text'}}">{{path}}</code>
+                        <code class="ml-4 {{fontClass 'code'}} px-3 py-1 rounded {{themeClass 'surface'}} {{themeClass 'text'}}">{{path}}</code>
                     </div>
                     
                     {{#if summary}}
-                    <h3 class="text-2xl font-semibold mb-3 {{themeClass 'text'}}">{{summary}}</h3>
+                    <h3 class="{{fontClass 'heading2'}} mb-3 {{themeClass 'text'}}">{{summary}}</h3>
                     {{/if}}
                     
                     {{#if description}}
-                    <p class="mb-6 leading-relaxed {{themeClass 'textSecondary'}}">{{description}}</p>
+                    <p class="{{fontClass 'body'}} mb-6 leading-relaxed {{themeClass 'textSecondary'}}">{{description}}</p>
                     {{/if}}
 
                     {{#if tags}}
                     <div class="mb-6">
-                        <h4 class="text-sm font-semibold uppercase tracking-wide mb-2 {{themeClass 'textSecondary'}}">Tags</h4>
+                        <h4 class="{{fontClass 'label'}} uppercase tracking-wide mb-2 {{themeClass 'textSecondary'}}">Tags</h4>
                         <div class="flex flex-wrap gap-2">
                             {{#each tags}}
-                            <span class="inline-block text-xs px-3 py-1 rounded-full font-medium {{themeClass 'badge'}}">{{this}}</span>
+                            <span class="inline-block {{fontClass 'badge'}} px-3 py-1 rounded-full {{themeClass 'badge'}}">{{this}}</span>
                             {{/each}}
                         </div>
                     </div>
@@ -298,34 +316,34 @@ export class DocumentationService {
 
                     {{#if parameters}}
                     <div class="mb-6">
-                        <h4 class="text-lg font-semibold mb-4 {{themeClass 'text'}}">Parameters</h4>
+                        <h4 class="{{fontClass 'heading4'}} mb-4 {{themeClass 'text'}}">Parameters</h4>
                         <div class="overflow-x-auto">
                             <table class="min-w-full rounded-lg {{themeClass 'surface'}}">
                                 <thead>
                                     <tr class="{{themeClass 'surface'}}">
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Type</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">In</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Required</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Description</th>
+                                        <th class="px-6 py-3 text-left {{fontClass 'label'}} uppercase tracking-wider {{themeClass 'textSecondary'}}">Name</th>
+                                        <th class="px-6 py-3 text-left {{fontClass 'label'}} uppercase tracking-wider {{themeClass 'textSecondary'}}">Type</th>
+                                        <th class="px-6 py-3 text-left {{fontClass 'label'}} uppercase tracking-wider {{themeClass 'textSecondary'}}">In</th>
+                                        <th class="px-6 py-3 text-left {{fontClass 'label'}} uppercase tracking-wider {{themeClass 'textSecondary'}}">Required</th>
+                                        <th class="px-6 py-3 text-left {{fontClass 'label'}} uppercase tracking-wider {{themeClass 'textSecondary'}}">Description</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y {{themeClass 'border'}}">
                                     {{#each parameters}}
                                     <tr class="hover:{{themeClass 'surface'}}">
-                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm {{themeClass 'text'}}">{{name}}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-2 py-1 rounded text-xs {{themeClass 'badge'}}">{{type}}</span>
+                                        <td class="px-6 py-4 whitespace-nowrap {{fontClass 'code'}} {{themeClass 'text'}}">{{name}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 rounded {{fontClass 'badge'}} {{themeClass 'badge'}}">{{type}}</span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm {{themeClass 'textSecondary'}}">{{in}}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-4 whitespace-nowrap {{fontClass 'bodySmall'}} {{themeClass 'textSecondary'}}">{{in}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap {{fontClass 'bodySmall'}}">
                                             {{#if required}}
-                                            <span class="text-red-600 font-medium">Required</span>
+                                            <span class="text-red-600 zedoc-font-medium">Required</span>
                                             {{else}}
                                             <span class="{{themeClass 'textSecondary'}}">Optional</span>
                                             {{/if}}
                                         </td>
-                                        <td class="px-6 py-4 text-sm {{themeClass 'textSecondary'}}">{{description}}</td>
+                                        <td class="px-6 py-4 {{fontClass 'bodySmall'}} {{themeClass 'textSecondary'}}">{{description}}</td>
                                     </tr>
                                     {{/each}}
                                 </tbody>
@@ -336,15 +354,15 @@ export class DocumentationService {
 
                     {{#if responses}}
                     <div>
-                        <h4 class="text-lg font-semibold mb-4 {{themeClass 'text'}}">Responses</h4>
+                        <h4 class="{{fontClass 'heading4'}} mb-4 {{themeClass 'text'}}">Responses</h4>
                         <div class="space-y-3">
                             {{#each responses}}
                             <div class="flex items-start p-4 rounded-lg {{themeClass 'surface'}}">
-                                <span class="inline-block px-3 py-1 text-sm font-mono rounded border mr-4 min-w-[60px] text-center {{themeClass 'card'}} {{themeClass 'text'}} {{themeClass 'border'}}">{{statusCode}}</span>
+                                <span class="inline-block px-3 py-1 {{fontClass 'code'}} rounded border mr-4 min-w-[60px] text-center {{themeClass 'card'}} {{themeClass 'text'}} {{themeClass 'border'}}">{{statusCode}}</span>
                                 <div class="flex-1">
-                                    <span class="font-medium {{themeClass 'text'}}">{{description}}</span>
+                                    <span class="{{fontClass 'body'}} zedoc-font-medium {{themeClass 'text'}}">{{description}}</span>
                                     {{#if schema}}
-                                    <pre class="mt-2 text-xs p-2 rounded border overflow-x-auto {{themeClass 'card'}} {{themeClass 'textSecondary'}} {{themeClass 'border'}}"><code>{{json schema}}</code></pre>
+                                    <pre class="mt-2 {{fontClass 'caption'}} p-2 rounded border overflow-x-auto {{themeClass 'card'}} {{themeClass 'textSecondary'}} {{themeClass 'border'}}"><code>{{json schema}}</code></pre>
                                     {{/if}}
                                 </div>
                             </div>
@@ -357,7 +375,7 @@ export class DocumentationService {
             {{/each}}
         </div>
 
-        <footer class="mt-16 text-center text-sm {{themeClass 'textSecondary'}}">
+        <footer class="mt-16 text-center {{fontClass 'bodySmall'}} {{themeClass 'textSecondary'}}">
             <p>Generated with ❤️ by <strong>@kodesonik/zedoc</strong></p>
         </footer>
     </div>

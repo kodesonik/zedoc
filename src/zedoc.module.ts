@@ -3,6 +3,7 @@ import { DocumentationService } from './services/documentation.service';
 import { SwaggerIntegrationService } from './services/swagger-integration.service';
 import { ThemeService } from './services/theme.service';
 import { SidebarService } from './services/sidebar.service';
+import { FontService } from './services/font.service';
 import { DocumentationController } from './controllers/documentation.controller';
 import { DocumentationConfig } from './interfaces/documentation.interface';
 
@@ -16,13 +17,14 @@ export class ZedocModule {
         SwaggerIntegrationService,
         ThemeService,
         SidebarService,
+        FontService,
         {
           provide: 'DOCUMENTATION_CONFIG',
           useValue: config || {},
         },
       ],
       controllers: [DocumentationController],
-      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService],
+      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService, FontService],
       global: true,
     };
   }
@@ -38,6 +40,7 @@ export class ZedocModule {
         SwaggerIntegrationService,
         ThemeService,
         SidebarService,
+        FontService,
         {
           provide: 'DOCUMENTATION_CONFIG',
           useFactory: options.useFactory,
@@ -45,7 +48,7 @@ export class ZedocModule {
         },
       ],
       controllers: [DocumentationController],
-      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService],
+      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService, FontService],
       global: true,
     };
   }
