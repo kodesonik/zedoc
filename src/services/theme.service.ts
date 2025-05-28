@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ThemeConfig, ThemeColors } from '../interfaces/documentation.interface';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ThemeService {
@@ -104,6 +106,19 @@ export class ThemeService {
   }
 
   /**
+   * Load the enhanced CSS from the assets folder
+   */
+  private loadEnhancedCSS(): string {
+    try {
+      const cssPath = path.join(__dirname, '..', 'assets', 'docs.css');
+      return fs.readFileSync(cssPath, 'utf8');
+    } catch (error) {
+      console.warn('Could not load enhanced CSS file, using fallback styles');
+      return this.getFallbackCSS();
+    }
+  }
+
+  /**
    * Generate CSS custom properties for the theme
    */
   generateThemeCSS(themeConfig?: ThemeConfig): string {
@@ -113,7 +128,28 @@ export class ThemeService {
       .map(([key, value]) => `  --zedoc-${this.kebabCase(key)}: ${value};`)
       .join('\n');
     
-    return `:root {\n${cssVariables}\n}`;
+    // Load the enhanced CSS and combine with theme variables
+    const enhancedCSS = this.loadEnhancedCSS();
+    
+    return `${enhancedCSS}\n\n:root {\n${cssVariables}\n}`;
+  }
+
+  /**
+   * Fallback CSS if the enhanced CSS file cannot be loaded
+   */
+  private getFallbackCSS(): string {
+    return `
+      /* Fallback CSS */
+      body { font-family: 'Inter', sans-serif; }
+      .sidebar { width: 280px; position: fixed; height: 100vh; overflow-y: auto; }
+      .main-content { margin-left: 280px; padding: 2rem; }
+      .endpoint-card { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1rem; }
+      .endpoint-header { padding: 1rem; cursor: pointer; }
+      .endpoint-details { padding: 1rem; display: none; }
+      .endpoint-details.expanded { display: block; }
+      .method-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+      .theme-toggle { background: none; border: 1px solid #e2e8f0; border-radius: 50%; padding: 0.5rem; cursor: pointer; }
+    `;
   }
 
   /**
