@@ -153,12 +153,10 @@ export class SidebarService {
       `;
       
       tagEndpoints.forEach(endpoint => {
-        const methodClass = `method-${endpoint.method.toLowerCase()}`;
+        const title = endpoint.summary || `${endpoint.method} ${endpoint.path}`;
         html += `
           <a href="#endpoint-${this.generateEndpointId(endpoint)}" class="endpoint-link" data-method="${endpoint.method}" data-path="${endpoint.path}">
-            <span class="endpoint-method ${methodClass}">${endpoint.method}</span>
-            <span class="endpoint-path">${endpoint.path}</span>
-            ${endpoint.summary ? `<span class="endpoint-summary">${endpoint.summary}</span>` : ''}
+            <span class="endpoint-title">${title}</span>
           </a>
         `;
       });
@@ -470,24 +468,10 @@ export class SidebarService {
         border-color: var(--zedoc-border, #e2e8f0);
       }
 
-      .endpoint-method {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.125rem 0.5rem;
-        border-radius: 0.25rem;
-        width: fit-content;
-      }
-
-      .endpoint-path {
-        font-family: monospace;
+      .endpoint-title {
         font-size: 0.875rem;
+        font-weight: 600;
         color: var(--zedoc-text, #1e293b);
-        font-weight: 500;
-      }
-
-      .endpoint-summary {
-        font-size: 0.75rem;
-        color: var(--zedoc-text-secondary, #64748b);
       }
 
       /* Try Panel Styles */

@@ -814,7 +814,7 @@ export class DocumentationService {
         `;
         
         module.endpoints.forEach(endpoint => {
-          const methodClass = `method-${endpoint.method.toLowerCase()}`;
+          const title = endpoint.summary || `${endpoint.method} ${endpoint.path}`;
           const authIcon = endpoint.requiresAuth ? '🔒 ' : '';
           sectionsHTML += `
             <a href="#endpoint-${section.id}-${module.id}-${endpoint.method.toLowerCase()}-${endpoint.path.replace(/[^a-zA-Z0-9]/g, '-')}" 
@@ -822,9 +822,7 @@ export class DocumentationService {
                data-method="${endpoint.method}" 
                data-path="${endpoint.path}"
                data-requires-auth="${endpoint.requiresAuth}">
-              <span class="endpoint-method ${methodClass}">${endpoint.method}</span>
-              <span class="endpoint-path">${authIcon}${endpoint.path}</span>
-              <span class="endpoint-summary">${endpoint.summary}</span>
+              <span class="endpoint-title">${authIcon}${title}</span>
             </a>
           `;
         });
