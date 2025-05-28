@@ -8,6 +8,30 @@ export interface DocumentationConfig {
     url: string;
     description?: string;
   }>;
+  theme?: ThemeConfig;
+}
+
+export interface ThemeConfig {
+  preset?: 'basic' | 'postman' | 'insomnia' | 'swagger' | 'custom';
+  mode?: 'light' | 'dark';
+  colors?: ThemeColors;
+}
+
+export interface ThemeColors {
+  primary?: string;
+  secondary?: string;
+  tertiary?: string;
+  success?: string;
+  warning?: string;
+  danger?: string;
+  neutral?: string;
+  light?: string;
+  dark?: string;
+  background?: string;
+  surface?: string;
+  text?: string;
+  textSecondary?: string;
+  border?: string;
 }
 
 export interface ApiDocOptions {
@@ -21,8 +45,9 @@ export interface ApiDocOptions {
 export interface TemplateData {
   title: string;
   description?: string;
+  version: string;
   endpoints: EndpointInfo[];
-  version?: string;
+  theme?: ThemeConfig;
 }
 
 export interface EndpointInfo {

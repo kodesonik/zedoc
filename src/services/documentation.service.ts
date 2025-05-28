@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DocumentationConfig, TemplateData, EndpointInfo, ParameterInfo, ResponseInfo } from '../interfaces/documentation.interface';
+import { ThemeService } from './theme.service';
 import * as hbs from 'hbs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -8,7 +9,10 @@ import * as path from 'path';
 export class DocumentationService {
   private config: DocumentationConfig = {};
 
-  constructor(@Inject('DOCUMENTATION_CONFIG') config: DocumentationConfig) {
+  constructor(
+    @Inject('DOCUMENTATION_CONFIG') config: DocumentationConfig,
+    private readonly themeService: ThemeService,
+  ) {
     this.config = { ...this.config, ...config };
     this.setupHandlebars();
   }
@@ -27,6 +31,20 @@ export class DocumentationService {
     hbs.registerHelper('uppercase', (str: string) => str?.toUpperCase());
     hbs.registerHelper('lowercase', (str: string) => str?.toLowerCase());
     hbs.registerHelper('json', (obj: any) => JSON.stringify(obj, null, 2));
+    
+    // Theme-related helpers
+    hbs.registerHelper('themeClass', (className: string, context: any) => {
+      const themeClasses = this.themeService.getThemeClasses(context.data.root.theme);
+      return themeClasses[className] || '';
+    });
+    
+    hbs.registerHelper('themeCSS', (context: any) => {
+      return new hbs.SafeString(this.themeService.generateThemeCSS(context.data.root.theme));
+    });
+    
+    hbs.registerHelper('methodColors', (context: any) => {
+      return new hbs.SafeString(this.themeService.generateMethodColors(context.data.root.theme));
+    });
   }
 
   /**
@@ -60,7 +78,7 @@ export class DocumentationService {
         }
       });
     });
-console.log(endpoints);
+
     return endpoints;
   }
 
@@ -139,6 +157,7 @@ console.log(endpoints);
       description: this.config.description || swaggerDoc.info?.description,
       version: this.config.version || swaggerDoc.info?.version || '1.0.0',
       endpoints,
+      theme: this.config.theme,
     };
 
     const templatePath = path.join(__dirname, '../templates/documentation.hbs');
@@ -157,6 +176,7 @@ console.log(endpoints);
       description: this.config.description,
       version: this.config.version || '1.0.0',
       endpoints,
+      theme: this.config.theme,
     };
 
     const templatePath = path.join(__dirname, '../templates/documentation.hbs');
@@ -185,21 +205,16 @@ console.log(endpoints);
     <title>{{title}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .method-get { @apply bg-green-100 text-green-800; }
-        .method-post { @apply bg-blue-100 text-blue-800; }
-        .method-put { @apply bg-yellow-100 text-yellow-800; }
-        .method-delete { @apply bg-red-100 text-red-800; }
-        .method-patch { @apply bg-purple-100 text-purple-800; }
-        .method-options { @apply bg-gray-100 text-gray-800; }
-        .method-head { @apply bg-indigo-100 text-indigo-800; }
+        {{{themeCSS}}}
+        {{{methodColors}}}
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+<body class="{{themeClass 'body'}} min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl {{themeClass 'container'}}">
         <header class="mb-12 text-center">
-            <h1 class="text-5xl font-bold text-gray-900 mb-4">{{title}}</h1>
+            <h1 class="text-5xl font-bold mb-4 {{themeClass 'header'}}">{{title}}</h1>
             {{#if description}}
-            <p class="text-xl text-gray-600 mb-4">{{description}}</p>
+            <p class="text-xl mb-4 {{themeClass 'textSecondary'}}">{{description}}</p>
             {{/if}}
             {{#if version}}
             <span class="inline-block bg-blue-500 text-white text-sm px-4 py-2 rounded-full font-medium">Version {{version}}</span>
@@ -208,29 +223,29 @@ console.log(endpoints);
 
         <div class="space-y-8">
             {{#each endpoints}}
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="{{themeClass 'card'}} rounded-xl shadow-lg border overflow-hidden">
                 <div class="p-6">
                     <div class="flex items-center mb-6">
                         <span class="inline-block px-4 py-2 text-sm font-bold rounded-lg method-{{lowercase method}}">
                             {{method}}
                         </span>
-                        <code class="ml-4 text-lg font-mono text-gray-800 bg-gray-100 px-3 py-1 rounded">{{path}}</code>
+                        <code class="ml-4 text-lg font-mono px-3 py-1 rounded {{themeClass 'surface'}} {{themeClass 'text'}}">{{path}}</code>
                     </div>
                     
                     {{#if summary}}
-                    <h3 class="text-2xl font-semibold text-gray-900 mb-3">{{summary}}</h3>
+                    <h3 class="text-2xl font-semibold mb-3 {{themeClass 'text'}}">{{summary}}</h3>
                     {{/if}}
                     
                     {{#if description}}
-                    <p class="text-gray-700 mb-6 leading-relaxed">{{description}}</p>
+                    <p class="mb-6 leading-relaxed {{themeClass 'textSecondary'}}">{{description}}</p>
                     {{/if}}
 
                     {{#if tags}}
                     <div class="mb-6">
-                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Tags</h4>
+                        <h4 class="text-sm font-semibold uppercase tracking-wide mb-2 {{themeClass 'textSecondary'}}">Tags</h4>
                         <div class="flex flex-wrap gap-2">
                             {{#each tags}}
-                            <span class="inline-block bg-indigo-100 text-indigo-700 text-xs px-3 py-1 rounded-full font-medium">{{this}}</span>
+                            <span class="inline-block text-xs px-3 py-1 rounded-full font-medium {{themeClass 'badge'}}">{{this}}</span>
                             {{/each}}
                         </div>
                     </div>
@@ -238,34 +253,34 @@ console.log(endpoints);
 
                     {{#if parameters}}
                     <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Parameters</h4>
+                        <h4 class="text-lg font-semibold mb-4 {{themeClass 'text'}}">Parameters</h4>
                         <div class="overflow-x-auto">
-                            <table class="min-w-full bg-gray-50 rounded-lg">
+                            <table class="min-w-full rounded-lg {{themeClass 'surface'}}">
                                 <thead>
-                                    <tr class="bg-gray-200">
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">In</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    <tr class="{{themeClass 'surface'}}">
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">In</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Required</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{themeClass 'textSecondary'}}">Description</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200">
+                                <tbody class="divide-y {{themeClass 'border'}}">
                                     {{#each parameters}}
-                                    <tr class="hover:bg-gray-100">
-                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-900">{{name}}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">{{type}}</span>
+                                    <tr class="hover:{{themeClass 'surface'}}">
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm {{themeClass 'text'}}">{{name}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 py-1 rounded text-xs {{themeClass 'badge'}}">{{type}}</span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{in}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm {{themeClass 'textSecondary'}}">{{in}}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             {{#if required}}
                                             <span class="text-red-600 font-medium">Required</span>
                                             {{else}}
-                                            <span class="text-gray-500">Optional</span>
+                                            <span class="{{themeClass 'textSecondary'}}">Optional</span>
                                             {{/if}}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-700">{{description}}</td>
+                                        <td class="px-6 py-4 text-sm {{themeClass 'textSecondary'}}">{{description}}</td>
                                     </tr>
                                     {{/each}}
                                 </tbody>
@@ -276,15 +291,15 @@ console.log(endpoints);
 
                     {{#if responses}}
                     <div>
-                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Responses</h4>
+                        <h4 class="text-lg font-semibold mb-4 {{themeClass 'text'}}">Responses</h4>
                         <div class="space-y-3">
                             {{#each responses}}
-                            <div class="flex items-start p-4 bg-gray-50 rounded-lg">
-                                <span class="inline-block px-3 py-1 text-sm font-mono bg-white text-gray-800 rounded border mr-4 min-w-[60px] text-center">{{statusCode}}</span>
+                            <div class="flex items-start p-4 rounded-lg {{themeClass 'surface'}}">
+                                <span class="inline-block px-3 py-1 text-sm font-mono rounded border mr-4 min-w-[60px] text-center {{themeClass 'card'}} {{themeClass 'text'}} {{themeClass 'border'}}">{{statusCode}}</span>
                                 <div class="flex-1">
-                                    <span class="text-gray-900 font-medium">{{description}}</span>
+                                    <span class="font-medium {{themeClass 'text'}}">{{description}}</span>
                                     {{#if schema}}
-                                    <pre class="mt-2 text-xs text-gray-600 bg-white p-2 rounded border overflow-x-auto"><code>{{json schema}}</code></pre>
+                                    <pre class="mt-2 text-xs p-2 rounded border overflow-x-auto {{themeClass 'card'}} {{themeClass 'textSecondary'}} {{themeClass 'border'}}"><code>{{json schema}}</code></pre>
                                     {{/if}}
                                 </div>
                             </div>
@@ -297,7 +312,7 @@ console.log(endpoints);
             {{/each}}
         </div>
 
-        <footer class="mt-16 text-center text-gray-500 text-sm">
+        <footer class="mt-16 text-center text-sm {{themeClass 'textSecondary'}}">
             <p>Generated with ❤️ by <strong>@kodesonik/zedoc</strong></p>
         </footer>
     </div>

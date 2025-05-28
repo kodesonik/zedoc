@@ -1,6 +1,7 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { DocumentationService } from './services/documentation.service';
 import { SwaggerIntegrationService } from './services/swagger-integration.service';
+import { ThemeService } from './services/theme.service';
 import { DocumentationController } from './controllers/documentation.controller';
 import { DocumentationConfig } from './interfaces/documentation.interface';
 
@@ -12,13 +13,14 @@ export class ZedocModule {
       providers: [
         DocumentationService,
         SwaggerIntegrationService,
+        ThemeService,
         {
           provide: 'DOCUMENTATION_CONFIG',
           useValue: config || {},
         },
       ],
       controllers: [DocumentationController],
-      exports: [DocumentationService, SwaggerIntegrationService],
+      exports: [DocumentationService, SwaggerIntegrationService, ThemeService],
       global: true,
     };
   }
@@ -32,6 +34,7 @@ export class ZedocModule {
       providers: [
         DocumentationService,
         SwaggerIntegrationService,
+        ThemeService,
         {
           provide: 'DOCUMENTATION_CONFIG',
           useFactory: options.useFactory,
@@ -39,7 +42,7 @@ export class ZedocModule {
         },
       ],
       controllers: [DocumentationController],
-      exports: [DocumentationService, SwaggerIntegrationService],
+      exports: [DocumentationService, SwaggerIntegrationService, ThemeService],
       global: true,
     };
   }
