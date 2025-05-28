@@ -1,5 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { AppService } from './app.service';
 
 @ApiTags('App')
@@ -44,6 +44,100 @@ export class AppController {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     };
+  }
+
+  @Get('load-external-swagger')
+  @ApiOperation({ summary: 'Load external Swagger document' })
+  @ApiQuery({ 
+    name: 'url', 
+    required: false, 
+    description: 'URL of the Swagger JSON document',
+    example: 'https://api.staging.thecyrcle.com/v1/json'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'External Swagger document loaded successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'External Swagger document loaded successfully' },
+        source: { type: 'string', example: 'https://api.staging.thecyrcle.com/v1/json' },
+        info: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', example: 'External API' },
+            version: { type: 'string', example: '1.0.0' },
+            description: { type: 'string', example: 'External API description' },
+            pathsCount: { type: 'number', example: 50 }
+          }
+        },
+        sectionsGenerated: { type: 'number', example: 10 },
+        modulesGenerated: { type: 'number', example: 25 },
+        endpointsGenerated: { type: 'number', example: 50 }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Failed to load external Swagger document' 
+  })
+  async loadExternalSwagger(@Query('url') url?: string) {
+    try {
+      // Import the SwaggerIntegrationService to process it
+      const { SwaggerIntegrationService } = await import('@kodesonik/zedoc');
+      const swaggerService = new SwaggerIntegrationService();
+      
+      // Use provided URL or default to the complex API
+      const swaggerUrl = url || 'https://api.staging.thecyrcle.com/v1/json';
+      
+      // Load the external Swagger document
+      await swaggerService.setSwaggerJson(swaggerUrl, {
+        timeout: 15000,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': '@kodesonik/zedoc-test'
+        }
+      });
+      
+      // Get document info
+      const info = swaggerService.getSwaggerInfo();
+      
+      // Get the document and convert to sections
+      const swaggerDoc = await swaggerService.getSwaggerDocument();
+      const sections = swaggerService.convertSwaggerToSections(swaggerDoc);
+      
+      // Calculate statistics
+      const sectionsCount = sections.length;
+      const modulesCount = sections.reduce((acc, section) => acc + section.modules.length, 0);
+      const endpointsCount = sections.reduce((acc, section) => 
+        acc + section.modules.reduce((modAcc, module) => modAcc + module.endpoints.length, 0), 0
+      );
+      
+      return {
+        message: 'External Swagger document loaded successfully',
+        source: swaggerUrl,
+        info: info || { title: 'Unknown', version: 'Unknown', description: 'No description', pathsCount: 0 },
+        sectionsGenerated: sectionsCount,
+        modulesGenerated: modulesCount,
+        endpointsGenerated: endpointsCount,
+        timestamp: new Date().toISOString(),
+        features: [
+          'URL-based Swagger document loading',
+          'Automatic schema resolution',
+          'Complex API structure processing',
+          'Real-time section generation',
+          'Error handling and validation'
+        ]
+      };
+    } catch (error) {
+      return {
+        message: 'Failed to load external Swagger document',
+        error: error.message,
+        source: url || 'https://api.staging.thecyrcle.com/v1/json',
+        timestamp: new Date().toISOString(),
+        suggestion: 'Check if the URL is accessible and returns valid JSON'
+      };
+    }
   }
 
   @Get('test-complex-api')

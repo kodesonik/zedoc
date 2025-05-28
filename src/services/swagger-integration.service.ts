@@ -1,5 +1,7 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
 import { SectionConfig, ModuleConfig, EndpointConfig } from '../interfaces/documentation.interface';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class SwaggerIntegrationService {
@@ -12,6 +14,178 @@ export class SwaggerIntegrationService {
    */
   setSwaggerDocument(document: any): void {
     this.swaggerDocument = document;
+  }
+
+  /**
+   * Set Swagger document from URL or file path
+   * @param source URL (http/https) or file path to JSON file
+   * @param options Optional configuration for fetching
+   */
+  async setSwaggerJson(source: string, options?: {
+    timeout?: number;
+    headers?: Record<string, string>;
+    encoding?: BufferEncoding;
+  }): Promise<void> {
+    try {
+      console.log(`🔄 Loading Swagger document from: ${source}`);
+      
+      let swaggerDoc: any;
+      
+      if (this.isUrl(source)) {
+        // Fetch from URL
+        swaggerDoc = await this.fetchSwaggerFromUrl(source, options);
+      } else {
+        // Load from file path
+        swaggerDoc = await this.loadSwaggerFromFile(source, options?.encoding);
+      }
+      
+      // Validate the document
+      if (!this.isValidSwaggerDocument(swaggerDoc)) {
+        throw new Error('Invalid Swagger/OpenAPI document format');
+      }
+      
+      this.swaggerDocument = swaggerDoc;
+      console.log(`✅ Swagger document loaded successfully from: ${source}`);
+      console.log(`📊 Document info: ${swaggerDoc.info?.title || 'Unknown'} v${swaggerDoc.info?.version || 'Unknown'}`);
+      
+      if (swaggerDoc.paths) {
+        const pathCount = Object.keys(swaggerDoc.paths).length;
+        console.log(`🛣️  Found ${pathCount} paths in the document`);
+      }
+      
+    } catch (error) {
+      console.error(`❌ Failed to load Swagger document from ${source}:`, error.message);
+      throw new Error(`Failed to load Swagger document: ${error.message}`);
+    }
+  }
+
+  /**
+   * Check if a string is a URL
+   */
+  private isUrl(source: string): boolean {
+    try {
+      const url = new URL(source);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Fetch Swagger document from URL
+   */
+  private async fetchSwaggerFromUrl(url: string, options?: {
+    timeout?: number;
+    headers?: Record<string, string>;
+  }): Promise<any> {
+    const timeout = options?.timeout || 10000; // 10 seconds default
+    const headers = {
+      'Accept': 'application/json',
+      'User-Agent': '@kodesonik/zedoc',
+      ...options?.headers
+    };
+
+    try {
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        console.warn(`⚠️  Content-Type is ${contentType}, expected application/json`);
+      }
+
+      const data = await response.json();
+      return data;
+
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error(`Request timeout after ${timeout}ms`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Load Swagger document from file path
+   */
+  private async loadSwaggerFromFile(filePath: string, encoding: BufferEncoding = 'utf8'): Promise<any> {
+    try {
+      // Resolve relative paths
+      const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
+      
+      // Check if file exists
+      if (!fs.existsSync(resolvedPath)) {
+        throw new Error(`File not found: ${resolvedPath}`);
+      }
+
+      // Check file extension
+      const ext = path.extname(resolvedPath).toLowerCase();
+      if (ext !== '.json') {
+        console.warn(`⚠️  File extension is ${ext}, expected .json`);
+      }
+
+      // Read and parse file
+      const fileContent = fs.readFileSync(resolvedPath, encoding);
+      const data = JSON.parse(fileContent);
+      
+      return data;
+
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error(`Invalid JSON format: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Validate if the document is a valid Swagger/OpenAPI document
+   */
+  private isValidSwaggerDocument(doc: any): boolean {
+    if (!doc || typeof doc !== 'object') {
+      return false;
+    }
+
+    // Check for OpenAPI 3.x
+    if (doc.openapi && typeof doc.openapi === 'string') {
+      return doc.openapi.startsWith('3.') && doc.info && doc.paths;
+    }
+
+    // Check for Swagger 2.x
+    if (doc.swagger && typeof doc.swagger === 'string') {
+      return doc.swagger.startsWith('2.') && doc.info && doc.paths;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get current Swagger document info
+   */
+  getSwaggerInfo(): { title?: string; version?: string; description?: string; pathsCount?: number } | null {
+    if (!this.swaggerDocument) {
+      return null;
+    }
+
+    return {
+      title: this.swaggerDocument.info?.title,
+      version: this.swaggerDocument.info?.version,
+      description: this.swaggerDocument.info?.description,
+      pathsCount: this.swaggerDocument.paths ? Object.keys(this.swaggerDocument.paths).length : 0
+    };
   }
 
   /**
