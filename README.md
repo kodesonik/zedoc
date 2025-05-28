@@ -1,15 +1,19 @@
 # @kodesonik/zedoc
 
-A NestJS library for generating beautiful API documentation with Swagger, Handlebars templates, and Tailwind CSS styling.
+A NestJS library for generating beautiful API documentation with Swagger integration, comprehensive theming, sidebar navigation, and interactive "Try It Out" functionality.
 
 ## Features
 
 - 🚀 Easy integration with NestJS applications
-- 📚 Beautiful HTML documentation generation
-- 🎨 Tailwind CSS styling for modern UI
+- 📚 Beautiful HTML documentation generation with Swagger integration
+- 🎨 Comprehensive theming system with 4 preset themes and full customization
+- 🧭 Advanced sidebar navigation with search and filtering
+- 🔧 Interactive "Try It Out" panel for API testing
+- 📱 Fully responsive design for all devices
+- 🌙 Dark/light mode support
+- 🔍 Real-time search and tags filtering
+- 🎯 Tailwind CSS styling for modern UI
 - 🔧 Customizable Handlebars templates
-- 📖 Swagger integration
-- 🏷️ Custom decorators for enhanced documentation
 
 ## Installation
 
@@ -19,7 +23,7 @@ npm install @kodesonik/zedoc
 
 ## Quick Start
 
-### 1. Import the module
+### 1. Import the module with Swagger integration
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -29,49 +33,199 @@ import { ZedocModule } from '@kodesonik/zedoc';
   imports: [
     ZedocModule.forRoot({
       title: 'My API Documentation',
-      description: 'Comprehensive API documentation for my application',
+      description: 'Comprehensive API documentation with sidebar navigation',
       version: '1.0.0',
+      theme: {
+        preset: 'postman',
+        mode: 'light'
+      },
+      sidebar: {
+        position: 'left',
+        searchbar: true,
+        tagsFilter: true,
+        try: {
+          enabled: true,
+          position: 'auto'
+        }
+      }
     }),
   ],
 })
 export class AppModule {}
 ```
 
-### 2. Use the ApiDoc decorator
+### 2. Set up Swagger integration
 
 ```typescript
-import { Controller, Get } from '@nestjs/common';
-import { ApiDoc } from '@kodesonik/zedoc';
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ZedocModule } from '@kodesonik/zedoc';
+import { AppModule } from './app.module';
 
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Set up Swagger
+  const config = new DocumentBuilder()
+    .setTitle('My API')
+    .setDescription('API description')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  // Connect Zedoc with Swagger
+  ZedocModule.setSwaggerDocument(app, document);
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+### 3. Use standard Swagger decorators
+
+```typescript
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   @Get()
-  @ApiDoc({
+  @ApiOperation({ 
     summary: 'Get all users',
-    description: 'Retrieve a list of all users in the system',
-    tags: ['Users'],
+    description: 'Retrieve a list of all users in the system'
   })
+  @ApiResponse({ status: 200, description: 'List of users' })
   findAll() {
     return [];
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'User details' })
+  findOne(@Param('id') id: string) {
+    return {};
   }
 }
 ```
 
-### 3. Access your documentation
+### 4. Access your documentation
 
-Navigate to `/docs` in your application to view the generated documentation.
+- **Zedoc Documentation**: Navigate to `/docs` for the beautiful themed documentation
+- **Swagger UI**: Navigate to `/api` for the standard Swagger interface
+- **Swagger JSON**: Navigate to `/api-json` for the raw Swagger document
+
+## 🎨 Theme Configuration
+
+### Preset Themes
+
+Choose from 4 beautiful preset themes:
+
+```typescript
+// Postman-inspired theme
+theme: { preset: 'postman', mode: 'light' }
+
+// Insomnia-inspired theme  
+theme: { preset: 'insomnia', mode: 'light' }
+
+// Swagger-inspired theme
+theme: { preset: 'swagger', mode: 'light' }
+
+// Basic clean theme (default)
+theme: { preset: 'basic', mode: 'light' }
+```
+
+### Dark Mode
+
+All themes support dark mode:
+
+```typescript
+theme: {
+  preset: 'postman',
+  mode: 'dark'  // or 'light'
+}
+```
+
+### Custom Colors
+
+Full color customization:
+
+```typescript
+theme: {
+  preset: 'custom',
+  mode: 'light',
+  colors: {
+    primary: '#ff6c37',
+    secondary: '#4a5568',
+    success: '#48bb78',
+    warning: '#ed8936',
+    danger: '#f56565',
+    background: '#ffffff',
+    surface: '#f8fafc',
+    text: '#1a1a1a',
+    textSecondary: '#6b7280',
+    border: '#e5e5e5'
+  }
+}
+```
+
+## 🧭 Sidebar Configuration
+
+### Basic Sidebar Setup
+
+```typescript
+sidebar: {
+  position: 'left',        // 'left' | 'right' | 'none'
+  searchbar: true,         // Enable search functionality
+  tagsFilter: true,        // Enable tags filtering
+  collapsible: true,       // Allow sidebar collapse
+  width: '320px',          // Sidebar width
+  try: {
+    enabled: true,         // Enable "Try It Out" panel
+    position: 'auto',      // Auto-position opposite to sidebar
+    width: '400px',        // Try panel width
+    defaultExpanded: false // Start collapsed
+  }
+}
+```
+
+### Sidebar Features
+
+- **🔍 Real-time Search**: Search through endpoints, methods, and descriptions
+- **🏷️ Tags Filtering**: Filter endpoints by Swagger tags
+- **📱 Mobile Responsive**: Auto-collapse on mobile devices
+- **🎯 Smart Navigation**: Click endpoints to scroll and highlight
+- **⚙️ Try It Out Panel**: Interactive API testing (positioned automatically)
+
+### Layout Options
+
+```typescript
+// Classic left sidebar + right try panel
+sidebar: { position: 'left', try: { enabled: true, position: 'auto' } }
+
+// Right sidebar + left try panel  
+sidebar: { position: 'right', try: { enabled: true, position: 'auto' } }
+
+// No sidebar, just try panel
+sidebar: { position: 'none', try: { enabled: true, position: 'right' } }
+
+// Full-width documentation
+sidebar: { position: 'none', try: { enabled: false } }
+```
 
 ## Configuration
 
-### Basic Configuration
+### Complete Configuration Example
 
 ```typescript
 ZedocModule.forRoot({
-  title: 'My API',
-  description: 'API documentation',
-  version: '1.0.0',
+  title: 'My Awesome API',
+  description: 'Complete API documentation with all features',
+  version: '2.0.0',
   basePath: '/api',
-  tags: ['Users', 'Products'],
+  tags: ['Users', 'Products', 'Orders'],
   servers: [
     {
       url: 'https://api.example.com',
@@ -82,6 +236,28 @@ ZedocModule.forRoot({
       description: 'Development server',
     },
   ],
+  theme: {
+    preset: 'postman',
+    mode: 'light',
+    colors: {
+      primary: '#ff6c37',
+      secondary: '#4a5568',
+      success: '#48bb78'
+    }
+  },
+  sidebar: {
+    position: 'left',
+    width: '350px',
+    searchbar: true,
+    tagsFilter: true,
+    collapsible: true,
+    try: {
+      enabled: true,
+      position: 'auto',
+      width: '450px',
+      defaultExpanded: false
+    }
+  }
 })
 ```
 
@@ -89,14 +265,34 @@ ZedocModule.forRoot({
 
 ```typescript
 ZedocModule.forRootAsync({
-  useFactory: async (configService: ConfigService) => ({
-    title: configService.get('API_TITLE'),
-    description: configService.get('API_DESCRIPTION'),
-    version: configService.get('API_VERSION'),
-  }),
+  useFactory: async (configService: ConfigService) => {
+    const isDevelopment = configService.get('NODE_ENV') === 'development';
+    
+    return {
+      title: configService.get('API_TITLE'),
+      description: configService.get('API_DESCRIPTION'),
+      version: configService.get('API_VERSION'),
+      theme: {
+        preset: 'postman',
+        mode: isDevelopment ? 'light' : 'dark'
+      },
+      sidebar: {
+        position: 'left',
+        try: {
+          enabled: isDevelopment,  // Only in development
+          defaultExpanded: isDevelopment
+        }
+      }
+    };
+  },
   inject: [ConfigService],
 })
 ```
+
+## 📚 Documentation Guides
+
+- **[Theme Configuration Guide](THEME_EXAMPLES.md)** - Complete theming documentation
+- **[Sidebar Configuration Guide](SIDEBAR_CONFIGURATION.md)** - Comprehensive sidebar setup
 
 ## API Reference
 
@@ -115,18 +311,31 @@ interface DocumentationConfig {
     url: string;
     description?: string;
   }>;
+  theme?: ThemeConfig;
+  sidebar?: SidebarConfig;
 }
 ```
 
-#### ApiDocOptions
+#### ThemeConfig
 
 ```typescript
-interface ApiDocOptions {
-  summary?: string;
-  description?: string;
-  tags?: string[];
-  deprecated?: boolean;
-  operationId?: string;
+interface ThemeConfig {
+  preset?: 'basic' | 'postman' | 'insomnia' | 'swagger' | 'custom';
+  mode?: 'light' | 'dark';
+  colors?: ThemeColors;
+}
+```
+
+#### SidebarConfig
+
+```typescript
+interface SidebarConfig {
+  position?: 'left' | 'right' | 'none';
+  try?: TryPanelConfig;
+  searchbar?: boolean;
+  tagsFilter?: boolean;
+  collapsible?: boolean;
+  width?: string;
 }
 ```
 
@@ -134,54 +343,85 @@ interface ApiDocOptions {
 
 #### DocumentationService
 
-The main service for generating documentation.
+The main service for generating documentation from Swagger.
 
 ```typescript
 class DocumentationService {
   setConfig(config: DocumentationConfig): void;
   getConfig(): DocumentationConfig;
-  generateDocumentation(endpoints: EndpointInfo[]): string;
+  generateDocumentationFromSwagger(swaggerDoc: any): string;
+  transformSwaggerToEndpoints(swaggerDoc: any): EndpointInfo[];
 }
 ```
 
-### Decorators
+#### ThemeService
 
-#### @ApiDoc(options: ApiDocOptions)
+Service for managing themes and generating theme-specific CSS.
 
-Decorator for adding documentation metadata to controller methods.
+```typescript
+class ThemeService {
+  getResolvedTheme(themeConfig?: ThemeConfig): ThemeColors;
+  generateThemeCSS(themeConfig?: ThemeConfig): string;
+  generateMethodColors(themeConfig?: ThemeConfig): string;
+}
+```
+
+#### SidebarService
+
+Service for managing sidebar functionality and layout.
+
+```typescript
+class SidebarService {
+  getResolvedSidebarConfig(sidebarConfig?: SidebarConfig): SidebarConfig;
+  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: EndpointInfo[], tags: string[]): string;
+  generateSidebarCSS(sidebarConfig: SidebarConfig): string;
+}
+```
 
 ## Custom Templates
 
-You can customize the documentation appearance by providing your own Handlebars templates. Place your custom template at `src/templates/documentation.hbs` in your project.
+You can customize the documentation appearance by providing your own Handlebars templates. The library provides several helpers for theme and sidebar integration.
 
-### Template Variables
-
-- `title`: Documentation title
-- `description`: Documentation description
-- `version`: API version
-- `endpoints`: Array of endpoint information
-
-### Example Custom Template
+### Available Handlebars Helpers
 
 ```handlebars
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{title}}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-    <h1>{{title}}</h1>
-    {{#each endpoints}}
-        <div>
-            <span>{{method}}</span>
-            <code>{{path}}</code>
-            <p>{{description}}</p>
-        </div>
-    {{/each}}
-</body>
-</html>
+<!-- Theme helpers -->
+{{{themeCSS}}}
+{{{methodColors}}}
+{{themeClass 'body'}}
+
+<!-- Sidebar helpers -->
+{{{sidebarHTML}}}
+{{{tryPanelHTML}}}
+{{{sidebarCSS}}}
+{{{sidebarJS}}}
+
+<!-- Utility helpers -->
+{{endpointId endpoint}}
+{{json object}}
+{{uppercase string}}
+{{lowercase string}}
 ```
+
+## Migration from v1.x
+
+If you're upgrading from v1.x, the library now uses Swagger as the foundation instead of custom decorators:
+
+### Before (v1.x)
+```typescript
+@ApiDoc({
+  summary: 'Get users',
+  tags: ['Users']
+})
+```
+
+### After (v2.x)
+```typescript
+@ApiOperation({ summary: 'Get users' })
+@ApiTags('users')
+```
+
+The library automatically extracts documentation from your existing Swagger setup!
 
 ## Contributing
 
@@ -199,11 +439,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For support, please open an issue on [GitHub](https://github.com/kodesonik/zedoc/issues).
 
-## Changelog
+---
 
-### 1.0.0
-- Initial release
-- Basic documentation generation
-- Handlebars template support
-- Tailwind CSS styling
-- Swagger integration 
+**@kodesonik/zedoc** - Beautiful API documentation made simple! 🎨✨ 

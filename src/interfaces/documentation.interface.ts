@@ -9,12 +9,49 @@ export interface DocumentationConfig {
     description?: string;
   }>;
   theme?: ThemeConfig;
+  sidebar?: SidebarConfig;
 }
 
 export interface ThemeConfig {
   preset?: 'basic' | 'postman' | 'insomnia' | 'swagger' | 'custom';
   mode?: 'light' | 'dark';
   colors?: ThemeColors;
+  fonts?: FontConfig;
+}
+
+export interface FontConfig {
+  size?: 'sm' | 'md' | 'lg' | 'custom';
+  family?: 'inter' | 'roboto' | 'system' | 'custom';
+  customSizes?: FontSizes;
+  customFamily?: string;
+}
+
+export interface FontSizes {
+  xs?: string;
+  sm?: string;
+  base?: string;
+  lg?: string;
+  xl?: string;
+  '2xl'?: string;
+  '3xl'?: string;
+  '4xl'?: string;
+  '5xl'?: string;
+}
+
+export interface SidebarConfig {
+  position?: 'left' | 'right' | 'none';
+  try?: TryPanelConfig;
+  searchbar?: boolean;
+  tagsFilter?: boolean;
+  collapsible?: boolean;
+  width?: string;
+}
+
+export interface TryPanelConfig {
+  enabled?: boolean;
+  position?: 'auto' | 'left' | 'right';
+  width?: string;
+  defaultExpanded?: boolean;
 }
 
 export interface ThemeColors {
@@ -48,6 +85,8 @@ export interface TemplateData {
   version: string;
   endpoints: EndpointInfo[];
   theme?: ThemeConfig;
+  sidebar?: SidebarConfig;
+  tags?: string[];
 }
 
 export interface EndpointInfo {

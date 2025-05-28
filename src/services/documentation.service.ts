@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DocumentationConfig, TemplateData, EndpointInfo, ParameterInfo, ResponseInfo } from '../interfaces/documentation.interface';
 import { ThemeService } from './theme.service';
+import { SidebarService } from './sidebar.service';
 import * as hbs from 'hbs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -12,6 +13,7 @@ export class DocumentationService {
   constructor(
     @Inject('DOCUMENTATION_CONFIG') config: DocumentationConfig,
     private readonly themeService: ThemeService,
+    private readonly sidebarService: SidebarService,
   ) {
     this.config = { ...this.config, ...config };
     this.setupHandlebars();
@@ -44,6 +46,32 @@ export class DocumentationService {
     
     hbs.registerHelper('methodColors', (context: any) => {
       return new hbs.SafeString(this.themeService.generateMethodColors(context.data.root.theme));
+    });
+
+    // Sidebar-related helpers
+    hbs.registerHelper('sidebarHTML', (context: any) => {
+      const sidebarConfig = this.sidebarService.getResolvedSidebarConfig(context.data.root.sidebar);
+      const endpoints = context.data.root.endpoints || [];
+      const tags = context.data.root.tags || [];
+      return new hbs.SafeString(this.sidebarService.generateSidebarHTML(sidebarConfig, endpoints, tags));
+    });
+
+    hbs.registerHelper('tryPanelHTML', (context: any) => {
+      const sidebarConfig = this.sidebarService.getResolvedSidebarConfig(context.data.root.sidebar);
+      return new hbs.SafeString(this.sidebarService.generateTryPanelHTML(sidebarConfig.try!));
+    });
+
+    hbs.registerHelper('sidebarCSS', (context: any) => {
+      const sidebarConfig = this.sidebarService.getResolvedSidebarConfig(context.data.root.sidebar);
+      return new hbs.SafeString(this.sidebarService.generateSidebarCSS(sidebarConfig));
+    });
+
+    hbs.registerHelper('sidebarJS', () => {
+      return new hbs.SafeString(this.sidebarService.generateSidebarJS());
+    });
+
+    hbs.registerHelper('endpointId', (endpoint: EndpointInfo) => {
+      return `endpoint-${endpoint.method.toLowerCase()}-${endpoint.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
     });
   }
 
@@ -151,6 +179,7 @@ export class DocumentationService {
    */
   generateDocumentationFromSwagger(swaggerDoc: any): string {
     const endpoints = this.transformSwaggerToEndpoints(swaggerDoc);
+    const tags = this.sidebarService.extractTags(endpoints);
     
     const templateData: TemplateData = {
       title: this.config.title || swaggerDoc.info?.title || 'API Documentation',
@@ -158,6 +187,8 @@ export class DocumentationService {
       version: this.config.version || swaggerDoc.info?.version || '1.0.0',
       endpoints,
       theme: this.config.theme,
+      sidebar: this.config.sidebar,
+      tags,
     };
 
     const templatePath = path.join(__dirname, '../templates/documentation.hbs');
@@ -171,12 +202,16 @@ export class DocumentationService {
    * Legacy method for backward compatibility
    */
   generateDocumentation(endpoints: EndpointInfo[]): string {
+    const tags = this.sidebarService.extractTags(endpoints);
+    
     const templateData: TemplateData = {
       title: this.config.title || 'API Documentation',
       description: this.config.description,
       version: this.config.version || '1.0.0',
       endpoints,
       theme: this.config.theme,
+      sidebar: this.config.sidebar,
+      tags,
     };
 
     const templatePath = path.join(__dirname, '../templates/documentation.hbs');
@@ -207,10 +242,20 @@ export class DocumentationService {
     <style>
         {{{themeCSS}}}
         {{{methodColors}}}
+        {{{sidebarCSS}}}
+        
+        /* Endpoint highlighting */
+        .endpoint-card.highlighted {
+          border-color: var(--zedoc-primary, #3b82f6) !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
     </style>
 </head>
 <body class="{{themeClass 'body'}} min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-6xl {{themeClass 'container'}}">
+    {{{sidebarHTML}}}
+    {{{tryPanelHTML}}}
+    
+    <div class="main-content container mx-auto px-4 py-8 max-w-6xl {{themeClass 'container'}}">
         <header class="mb-12 text-center">
             <h1 class="text-5xl font-bold mb-4 {{themeClass 'header'}}">{{title}}</h1>
             {{#if description}}
@@ -223,7 +268,7 @@ export class DocumentationService {
 
         <div class="space-y-8">
             {{#each endpoints}}
-            <div class="{{themeClass 'card'}} rounded-xl shadow-lg border overflow-hidden">
+            <div id="{{endpointId this}}" class="endpoint-card {{themeClass 'card'}} rounded-xl shadow-lg border overflow-hidden">
                 <div class="p-6">
                     <div class="flex items-center mb-6">
                         <span class="inline-block px-4 py-2 text-sm font-bold rounded-lg method-{{lowercase method}}">
@@ -316,6 +361,8 @@ export class DocumentationService {
             <p>Generated with ❤️ by <strong>@kodesonik/zedoc</strong></p>
         </footer>
     </div>
+
+    {{{sidebarJS}}}
 </body>
 </html>
     `;

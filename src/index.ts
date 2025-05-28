@@ -2,6 +2,7 @@ export * from './zedoc.module';
 export * from './services/documentation.service';
 export * from './services/swagger-integration.service';
 export * from './services/theme.service';
+export * from './services/sidebar.service';
 export * from './decorators/api-doc.decorator';
 export * from './interfaces/documentation.interface';
 export * from './controllers/documentation.controller'; 

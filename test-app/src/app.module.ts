@@ -7,8 +7,8 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     ZedocModule.forRoot({
-      title: 'Zedoc Test API with Themes',
-      description: 'Demonstrating theme capabilities of @kodesonik/zedoc library',
+      title: 'Zedoc Test API with Sidebar',
+      description: 'Demonstrating sidebar and theme capabilities of @kodesonik/zedoc library',
       version: '2.0.0',
       theme: {
         preset: 'postman',
@@ -19,6 +19,19 @@ import { AppService } from './app.service';
           success: '#48bb78',
           warning: '#ed8936',
           danger: '#f56565',
+        }
+      },
+      sidebar: {
+        position: 'left',
+        searchbar: true,
+        tagsFilter: true,
+        collapsible: true,
+        width: '350px',
+        try: {
+          enabled: true,
+          position: 'auto', // Will be positioned on the right (opposite of sidebar)
+          width: '450px',
+          defaultExpanded: false,
         }
       }
     }),
