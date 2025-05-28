@@ -160,4 +160,86 @@ export interface CoverConfig {
   opacity?: number;
   overlay?: boolean;
   overlayColor?: string;
+}
+
+// New Architecture Interfaces
+export interface ApiEndpoint {
+  method: string;
+  path: string;
+  summary: string;
+  description: string;
+  requiresAuth: boolean;
+  tags: string | string[];
+  requestHeaders?: Record<string, any> | string;
+  requestBody?: Record<string, any> | string;
+  successResponse?: Record<string, any> | string;
+  responseExample?: string;
+  errorResponses?: ErrorResponse[];
+}
+
+export interface ErrorResponse {
+  status: number;
+  description: string;
+  example: Record<string, any> | string;
+}
+
+export interface EndpointConfig {
+  method: string;
+  path: string;
+  summary: string;
+  description: string;
+  requiresAuth?: boolean;
+  tags?: string | string[];
+  additionalHeaders?: Record<string, string>;
+  requestBody?: Record<string, any>;
+  successData?: any;
+  successMessage?: string;
+  successStatus?: number;
+  errorResponses?: Array<{
+    status: number;
+    description: string;
+    error: string;
+    message: string;
+  }>;
+}
+
+export interface ModuleConfig {
+  id: string;
+  name: string;
+  description: string;
+  endpoints: EndpointConfig[];
+}
+
+export interface SectionConfig {
+  id: string;
+  name: string;
+  modules: ModuleConfig[];
+}
+
+export interface NewDocumentationConfig {
+  title: string;
+  description: string;
+  sections: SectionConfig[];
+  environment?: EnvironmentConfig;
+  theme?: ThemeConfig;
+  sidebar?: SidebarConfig;
+  branding?: BrandingConfig;
+  version?: string;
+  basePath?: string;
+  servers?: Array<{
+    url: string;
+    description?: string;
+  }>;
+}
+
+export interface NewTemplateData {
+  title: string;
+  description: string;
+  version?: string;
+  sections: SectionConfig[];
+  theme?: ThemeConfig;
+  sidebar?: SidebarConfig;
+  environment?: EnvironmentConfig;
+  branding?: BrandingConfig;
+  tags?: string[];
 } 
