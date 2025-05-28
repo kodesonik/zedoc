@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - API Documentation</title>
+    <link rel="stylesheet" href="/css/docs.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body class="light">
+    <button class="mobile-menu-btn">☰</button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="header-top">
+                    <div class="logo">{{title}}</div>
+                    <button class="theme-toggle">🌙</button>
+                </div>
+                <div class="subtitle">API Documentation</div>
+            </div>
+            
+            {{#each moduleGroups}}
+            <div class="nav-section">
+                <div class="nav-title">{{name}}</div>
+                {{#each modules}}
+                <a href="#{{id}}" class="nav-item">{{name}}</a>
+                {{/each}}
+            </div>
+            {{/each}}
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">{{title}} API</h1>
+                <p class="page-description">{{description}}</p>
+            </div>
+
+            <!-- Getting Started Section -->
+            <section id="getting-started" class="module-section">
+                <h2 class="module-title">Getting Started</h2>
+                <div class="endpoint-card">
+                    <div class="endpoint-details expanded">
+                        <div class="detail-section">
+                            <h4 class="detail-title">Base URL</h4>
+                            <div class="code-block">{{baseUrl}}/api/v1</div>
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-title">Content Type</h4>
+                            <div class="code-block">application/json</div>
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-title">API Version</h4>
+                            <p>All API endpoints are versioned and prefixed with <code>/api/v1</code></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API Module Groups -->
+            {{#each moduleGroups}}
+            {{#each modules}}
+            <section id="{{id}}" class="module-section">
+                <h2 class="module-title">{{name}}</h2>
+                {{#if description}}
+                <p class="module-description">{{description}}</p>
+                {{/if}}
+                
+                {{#each endpoints}}
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-{{method}}">{{method}}</span>
+                        <span class="endpoint-path">{{path}}</span>
+                        <span class="endpoint-summary">{{summary}}</span>
+                        <button class="try-button" data-method="{{method}}" data-path="{{path}}" data-endpoint-id="{{@../index}}-{{@index}}">Try</button>
+                    </div>
+                    <div class="endpoint-details">
+                        {{#if description}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">Description</h4>
+                            <p>{{description}}</p>
+                        </div>
+                        {{/if}}
+                        
+                        <div class="detail-section">
+                            <h4 class="detail-title">Authentication</h4>
+                            {{#if requiresAuth}}
+                            <p>🔒 Authentication Required</p>
+                            {{else}}
+                            <p>🌐 Public Endpoint</p>
+                            {{/if}}
+                        </div>
+                        
+                        {{#if roles}}
+                        {{#if roles.length}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">Required Roles</h4>
+                            <p>{{#each roles}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+                        </div>
+                        {{else}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">Required Roles</h4>
+                            <p>No specific roles required</p>
+                        </div>
+                        {{/if}}
+                        {{else}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">Required Roles</h4>
+                            <p>No specific roles required</p>
+                        </div>
+                        {{/if}}
+                        
+                        <div class="detail-section">
+                            <h4 class="detail-title">Request URL</h4>
+                            <div class="code-block">{{method}} {{../../baseUrl}}/api/v1{{path}}</div>
+                        </div>
+                        
+                        {{#if requestHeaders}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">Request Headers</h4>
+                            <div class="code-block json-code">
+                                <pre><code class="language-json">{{{requestHeaders}}}</code></pre>
+                            </div>
+                        </div>
+                        {{/if}}
+                        
+                        {{#if requestBody}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">Request Body</h4>
+                            <div class="code-block json-code">
+                                <pre><code class="language-json">{{{requestBody}}}</code></pre>
+                            </div>
+                        </div>
+                        {{/if}}
+                        
+                        {{#if successResponse}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">✅ Success Response (200)</h4>
+                            <div class="code-block json-code">
+                                <pre><code class="language-json">{{{successResponse}}}</code></pre>
+                            </div>
+                        </div>
+                        {{/if}}
+                        
+                        {{#if responseExample}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">✅ Success Response</h4>
+                            <div class="code-block json-code">
+                                <pre><code class="language-json">{{{responseExample}}}</code></pre>
+                            </div>
+                        </div>
+                        {{/if}}
+                        
+                        {{#if errorResponses}}
+                        <div class="detail-section">
+                            <h4 class="detail-title">❌ Error Responses</h4>
+                            {{#each errorResponses}}
+                            <div class="error-response">
+                                <h5 class="error-status">{{status}} - {{description}}</h5>
+                                <div class="code-block json-code">
+                                    <pre><code class="language-json">{{{example}}}</code></pre>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </section>
+            {{/each}}
+            {{/each}}
+        </main>
+    </div>
+
+    <!-- API Testing Side Panel -->
+    <div class="api-panel" id="apiPanel">
+        <div class="api-panel-header">
+            <div class="api-panel-title-section">
+                <h3 class="api-panel-title">API Testing</h3>
+                <div class="api-panel-subtitle" id="apiPanelSubtitle">Select an endpoint to test</div>
+            </div>
+            <button class="close-panel-btn" id="closePanelBtn">✕</button>
+        </div>
+        
+        <div class="api-panel-content">
+            <!-- Request Section -->
+            <div class="request-section">
+                <h4 class="section-title">Request</h4>
+                
+                <div class="request-url-section">
+                    <label class="input-label">Method & URL</label>
+                    <div class="url-input-group">
+                        <select class="method-select" id="requestMethod">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="PATCH">PATCH</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" class="url-input" id="requestUrl" placeholder="Enter request URL">
+                    </div>
+                </div>
+                
+                <div class="headers-section">
+                    <label class="input-label">Headers</label>
+                    <div class="headers-form" id="headersForm">
+                        <!-- Headers will be dynamically populated here -->
+                    </div>
+                    <button type="button" class="add-header-btn" id="addHeaderBtn">+ Add Header</button>
+                </div>
+                
+                <div class="query-section" id="querySection" style="display: none;">
+                    <label class="input-label">Query Parameters</label>
+                    <div class="query-form" id="queryForm">
+                        <!-- Query parameters will be dynamically populated here -->
+                    </div>
+                    <button type="button" class="add-query-btn" id="addQueryBtn">+ Add Parameter</button>
+                </div>
+                
+                <div class="body-section">
+                    <label class="input-label">Request Body</label>
+                    <textarea class="body-textarea" id="requestBody" placeholder='{"key": "value"}'></textarea>
+                </div>
+                
+                <button class="send-button" id="sendRequestBtn">Send Request</button>
+            </div>
+            
+            <!-- Response Section -->
+            <div class="response-section">
+                <div class="response-header">
+                    <h4 class="section-title">Response</h4>
+                    <button class="export-button" id="exportResponseBtn" disabled>Export JSON</button>
+                </div>
+                
+                <div class="response-status">
+                    <label class="input-label">Status Code</label>
+                    <div class="status-display" id="responseStatus">-</div>
+                </div>
+                
+                <div class="response-headers">
+                    <label class="input-label">Response Headers</label>
+                    <textarea class="response-textarea" id="responseHeaders" readonly placeholder="Response headers will appear here..."></textarea>
+                </div>
+                
+                <div class="response-body">
+                    <label class="input-label">Response Body</label>
+                    <textarea class="response-textarea" id="responseBody" readonly placeholder="Response body will appear here..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="/js/docs.js"></script>
+</body>
+</html> 
