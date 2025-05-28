@@ -7,9 +7,9 @@ import { UsersController } from './users.controller';
 @Module({
   imports: [
     ZedocModule.forRoot({
-      title: 'Unified API Documentation',
-      description: 'Demonstrating the unified Zedoc module with Swagger mode (automatic extraction)',
-      version: '2.0.0',
+      title: 'Auto-Structured API Documentation',
+      description: 'Demonstrating automatic conversion of Swagger ApiTags to sections and ApiOperation summaries to modules',
+      version: '3.0.0',
       theme: {
         preset: 'postman',
         mode: 'light',
@@ -67,7 +67,7 @@ import { UsersController } from './users.controller';
           apiKey: '',
         },
         headers: {
-          'X-Client-Version': '2.0.0',
+          'X-Client-Version': '3.0.0',
           'Accept': 'application/json',
         }
       },
@@ -82,7 +82,7 @@ import { UsersController } from './users.controller';
         },
         cover: {
           src: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300&q=80',
-          alt: 'Unified API Documentation',
+          alt: 'Auto-Structured API Documentation',
           position: 'hero',
           height: '300px',
           overlay: true,
