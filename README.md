@@ -321,6 +321,111 @@ environment: {
 - **🎯 Try Panel Integration**: Seamless API testing
 - **🌍 Multi-Environment**: Support for dev/staging/prod configs
 
+## 🎨 Branding Configuration
+
+### Basic Branding Setup
+
+```typescript
+branding: {
+  favicon: '/favicon.ico',
+  logo: {
+    src: '/logo.svg',
+    alt: 'Company Logo',
+    height: '40px',
+    position: 'header',
+    link: 'https://company.com'
+  },
+  cover: {
+    src: '/hero-image.jpg',
+    alt: 'API Documentation',
+    position: 'top',
+    height: '300px',
+    opacity: 0.9
+  }
+}
+```
+
+### Favicon Configuration
+
+```typescript
+// Different favicon formats
+branding: {
+  favicon: '/favicon.ico',     // ICO format
+  favicon: '/favicon.png',     // PNG format  
+  favicon: '/favicon.svg',     // SVG format (recommended)
+  favicon: 'https://cdn.example.com/favicon.svg'  // External URL
+}
+```
+
+### Logo Configuration
+
+```typescript
+// Header logo
+logo: {
+  src: '/logo.svg',
+  alt: 'Company Logo',
+  height: '40px',
+  position: 'header',
+  link: 'https://company.com'
+}
+
+// Sidebar logo
+logo: {
+  src: '/logo-white.svg',
+  alt: 'Company Logo',
+  height: '35px',
+  position: 'sidebar'
+}
+
+// Both header and sidebar
+logo: {
+  src: '/logo.svg',
+  alt: 'Company Logo',
+  height: '40px',
+  position: 'both',
+  link: '/'
+}
+```
+
+### Cover Image Configuration
+
+```typescript
+// Top banner
+cover: {
+  src: '/api-banner.jpg',
+  alt: 'API Documentation',
+  position: 'top',
+  height: '300px',
+  opacity: 0.9
+}
+
+// Hero section with overlay
+cover: {
+  src: '/hero-background.jpg',
+  alt: 'API Hero',
+  position: 'hero',
+  height: '400px',
+  overlay: true,
+  overlayColor: 'rgba(59, 130, 246, 0.7)'
+}
+
+// Background image
+cover: {
+  src: '/subtle-pattern.svg',
+  position: 'background',
+  opacity: 0.1
+}
+```
+
+### Branding Features
+
+- **🔖 Favicon Support**: ICO, PNG, SVG formats with automatic HTML generation
+- **🏷️ Logo Positioning**: Header, sidebar, or both positions with responsive design
+- **🖼️ Cover Images**: Top banner, hero section, or background with overlay support
+- **🔗 Smart Linking**: Optional logo links for enhanced navigation
+- **📱 Mobile Responsive**: Automatic scaling and optimization for all devices
+- **🎨 Theme Integration**: Seamless integration with all theme presets
+
 ## 🧭 Sidebar Configuration
 
 ### Basic Sidebar Setup
@@ -496,6 +601,7 @@ ZedocModule.forRootAsync({
 - **[Sidebar Configuration Guide](SIDEBAR_CONFIGURATION.md)** - Comprehensive sidebar setup
 - **[Font Configuration Guide](FONT_CONFIGURATION.md)** - Typography and font customization
 - **[Environment Variables Guide](ENVIRONMENT_CONFIGURATION.md)** - Authentication and configuration management
+- **[Branding Configuration Guide](BRANDING_CONFIGURATION.md)** - Favicon, logo, and cover image customization
 
 ## API Reference
 

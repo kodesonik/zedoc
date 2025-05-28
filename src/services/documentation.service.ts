@@ -4,6 +4,7 @@ import { ThemeService } from './theme.service';
 import { SidebarService } from './sidebar.service';
 import { FontService } from './font.service';
 import { EnvironmentService } from './environment.service';
+import { BrandingService } from './branding.service';
 import * as hbs from 'hbs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,6 +19,7 @@ export class DocumentationService {
     private readonly sidebarService: SidebarService,
     private readonly fontService: FontService,
     private readonly environmentService: EnvironmentService,
+    private readonly brandingService: BrandingService,
   ) {
     this.config = { ...this.config, ...config };
     this.setupHandlebars();
@@ -71,7 +73,8 @@ export class DocumentationService {
       const sidebarConfig = this.sidebarService.getResolvedSidebarConfig(context.data.root.sidebar);
       const endpoints = context.data.root.endpoints || [];
       const tags = context.data.root.tags || [];
-      return new hbs.SafeString(this.sidebarService.generateSidebarHTML(sidebarConfig, endpoints, tags));
+      const brandingConfig = context.data.root.branding;
+      return new hbs.SafeString(this.sidebarService.generateSidebarHTML(sidebarConfig, endpoints, tags, brandingConfig));
     });
 
     hbs.registerHelper('tryPanelHTML', (context: any) => {
@@ -97,6 +100,27 @@ export class DocumentationService {
 
     hbs.registerHelper('environmentJS', () => {
       return new hbs.SafeString(this.environmentService.generateEnvironmentJS());
+    });
+
+    // Branding-related helpers
+    hbs.registerHelper('faviconHTML', (context: any) => {
+      const brandingConfig = context.data.root.branding;
+      return new hbs.SafeString(this.brandingService.generateFaviconHTML(brandingConfig));
+    });
+
+    hbs.registerHelper('headerLogoHTML', (context: any) => {
+      const brandingConfig = context.data.root.branding;
+      return new hbs.SafeString(this.brandingService.generateHeaderLogoHTML(brandingConfig));
+    });
+
+    hbs.registerHelper('coverHTML', (context: any) => {
+      const brandingConfig = context.data.root.branding;
+      return new hbs.SafeString(this.brandingService.generateCoverHTML(brandingConfig));
+    });
+
+    hbs.registerHelper('brandingCSS', (context: any) => {
+      const brandingConfig = context.data.root.branding;
+      return new hbs.SafeString(this.brandingService.generateBrandingCSS(brandingConfig));
     });
 
     hbs.registerHelper('endpointId', (endpoint: EndpointInfo) => {
@@ -218,6 +242,7 @@ export class DocumentationService {
       theme: this.config.theme,
       sidebar: this.config.sidebar,
       environment: this.config.environment,
+      branding: this.config.branding,
       tags,
     };
 
@@ -242,6 +267,7 @@ export class DocumentationService {
       theme: this.config.theme,
       sidebar: this.config.sidebar,
       environment: this.config.environment,
+      branding: this.config.branding,
       tags,
     };
 
@@ -269,6 +295,7 @@ export class DocumentationService {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
+    {{{faviconHTML}}}
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         {{{fontCSS}}}
@@ -276,6 +303,7 @@ export class DocumentationService {
         {{{themeCSS}}}
         {{{methodColors}}}
         {{{sidebarCSS}}}
+        {{{brandingCSS}}}
         
         /* Endpoint highlighting */
         .endpoint-card.highlighted {
@@ -285,12 +313,21 @@ export class DocumentationService {
     </style>
 </head>
 <body class="{{themeClass 'body'}} min-h-screen">
+    {{{coverHTML}}}
     {{{sidebarHTML}}}
     {{{tryPanelHTML}}}
     
     <div class="main-content container mx-auto px-4 py-8 max-w-6xl {{themeClass 'container'}}">
         <header class="mb-12 text-center">
+            <div class="flex items-center justify-center mb-6">
+              {{{headerLogoHTML}}}
+              {{#unless branding.logo.src}}
+              <h1 class="{{fontClass 'title'}} {{themeClass 'header'}}">{{title}}</h1>
+              {{/unless}}
+            </div>
+            {{#if branding.logo.src}}
             <h1 class="{{fontClass 'title'}} mb-4 {{themeClass 'header'}}">{{title}}</h1>
+            {{/if}}
             {{#if description}}
             <p class="{{fontClass 'subtitle'}} mb-4 {{themeClass 'textSecondary'}}">{{description}}</p>
             {{/if}}

@@ -5,6 +5,7 @@ import { ThemeService } from './services/theme.service';
 import { SidebarService } from './services/sidebar.service';
 import { FontService } from './services/font.service';
 import { EnvironmentService } from './services/environment.service';
+import { BrandingService } from './services/branding.service';
 import { DocumentationController } from './controllers/documentation.controller';
 import { DocumentationConfig } from './interfaces/documentation.interface';
 
@@ -20,13 +21,14 @@ export class ZedocModule {
         SidebarService,
         FontService,
         EnvironmentService,
+        BrandingService,
         {
           provide: 'DOCUMENTATION_CONFIG',
           useValue: config || {},
         },
       ],
       controllers: [DocumentationController],
-      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService, FontService, EnvironmentService],
+      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService, FontService, EnvironmentService, BrandingService],
       global: true,
     };
   }
@@ -44,6 +46,7 @@ export class ZedocModule {
         SidebarService,
         FontService,
         EnvironmentService,
+        BrandingService,
         {
           provide: 'DOCUMENTATION_CONFIG',
           useFactory: options.useFactory,
@@ -51,7 +54,7 @@ export class ZedocModule {
         },
       ],
       controllers: [DocumentationController],
-      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService, FontService, EnvironmentService],
+      exports: [DocumentationService, SwaggerIntegrationService, ThemeService, SidebarService, FontService, EnvironmentService, BrandingService],
       global: true,
     };
   }

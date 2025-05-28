@@ -11,6 +11,7 @@ export interface DocumentationConfig {
   theme?: ThemeConfig;
   sidebar?: SidebarConfig;
   environment?: EnvironmentConfig;
+  branding?: BrandingConfig;
 }
 
 export interface ThemeConfig {
@@ -88,6 +89,7 @@ export interface TemplateData {
   theme?: ThemeConfig;
   sidebar?: SidebarConfig;
   environment?: EnvironmentConfig;
+  branding?: BrandingConfig;
   tags?: string[];
 }
 
@@ -133,4 +135,29 @@ export interface EnvironmentVariable {
   description?: string;
   type?: 'token' | 'header' | 'query' | 'body' | 'custom';
   sensitive?: boolean;
+}
+
+export interface BrandingConfig {
+  favicon?: string;
+  logo?: LogoConfig;
+  cover?: CoverConfig;
+}
+
+export interface LogoConfig {
+  src?: string;
+  alt?: string;
+  width?: string;
+  height?: string;
+  position?: 'header' | 'sidebar' | 'both';
+  link?: string;
+}
+
+export interface CoverConfig {
+  src?: string;
+  alt?: string;
+  position?: 'top' | 'background' | 'hero';
+  height?: string;
+  opacity?: number;
+  overlay?: boolean;
+  overlayColor?: string;
 } 

@@ -5,6 +5,7 @@ export * from './services/theme.service';
 export * from './services/sidebar.service';
 export * from './services/font.service';
 export * from './services/environment.service';
+export * from './services/branding.service';
 export * from './decorators/api-doc.decorator';
 export * from './interfaces/documentation.interface';
 export * from './controllers/documentation.controller'; 

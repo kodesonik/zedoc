@@ -7,9 +7,9 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     ZedocModule.forRoot({
-      title: 'Zedoc Test API with Environment Variables',
-      description: 'Demonstrating environment variables, font, sidebar and theme capabilities of @kodesonik/zedoc library',
-      version: '2.0.0',
+      title: 'Zedoc Test API with Branding',
+      description: 'Demonstrating branding, environment variables, font, sidebar and theme capabilities of @kodesonik/zedoc library',
+      version: '2.1.0',
       theme: {
         preset: 'postman',
         mode: 'light',
@@ -82,6 +82,23 @@ import { AppService } from './app.service';
         queryParams: {
           'version': 'v1',
         },
+      },
+      branding: {
+        favicon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-plain.svg',
+        logo: {
+          src: 'https://nestjs.com/img/logo-small.svg',
+          alt: 'NestJS Logo',
+          height: '45px',
+          position: 'both',
+          link: 'https://nestjs.com'
+        },
+        cover: {
+          src: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300&q=80',
+          alt: 'API Documentation Cover',
+          position: 'top',
+          height: '250px',
+          opacity: 0.9
+        }
       }
     }),
   ],

@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { SidebarConfig, TryPanelConfig, EndpointInfo, EnvironmentConfig } from '../interfaces/documentation.interface';
+import { SidebarConfig, TryPanelConfig, EndpointInfo, EnvironmentConfig, BrandingConfig } from '../interfaces/documentation.interface';
 import { EnvironmentService } from './environment.service';
+import { BrandingService } from './branding.service';
 
 @Injectable()
 export class SidebarService {
-  constructor(private readonly environmentService: EnvironmentService) {}
+  constructor(
+    private readonly environmentService: EnvironmentService,
+    private readonly brandingService: BrandingService,
+  ) {}
 
   /**
    * Get resolved sidebar configuration with defaults
@@ -60,16 +64,18 @@ export class SidebarService {
   /**
    * Generate sidebar HTML structure
    */
-  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: EndpointInfo[], tags: string[]): string {
+  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: EndpointInfo[], tags: string[], brandingConfig?: BrandingConfig): string {
     if (sidebarConfig.position === 'none') {
       return '';
     }
 
     const sidebarClass = `sidebar-${sidebarConfig.position}`;
     const collapsibleClass = sidebarConfig.collapsible ? 'collapsible' : '';
+    const sidebarLogo = this.brandingService.generateSidebarLogoHTML(brandingConfig);
 
     return `
       <div id="zedoc-sidebar" class="${sidebarClass} ${collapsibleClass}" style="width: ${sidebarConfig.width}">
+        ${sidebarLogo}
         <div class="sidebar-header">
           <h3 class="sidebar-title">Navigation</h3>
           ${sidebarConfig.collapsible ? '<button id="sidebar-toggle" class="sidebar-toggle">×</button>' : ''}
