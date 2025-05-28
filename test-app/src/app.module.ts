@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ZedocModule } from '@kodesonik/zedoc';
-import { UsersController } from './users.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UsersController } from './users.controller';
 
 @Module({
   imports: [
     ZedocModule.forRoot({
-      title: 'Zedoc Test API with Branding',
-      description: 'Demonstrating branding, environment variables, font, sidebar and theme capabilities of @kodesonik/zedoc library',
-      version: '2.1.0',
+      title: 'Auto-Structured API Documentation',
+      description: 'Demonstrating automatic conversion of Swagger ApiTags to sections and ApiOperation summaries to modules',
+      version: '3.0.0',
       theme: {
         preset: 'postman',
         mode: 'light',
@@ -17,8 +17,8 @@ import { AppService } from './app.service';
           primary: '#ff6c37',
           secondary: '#4a5568',
           success: '#48bb78',
-          warning: '#ed8936',
-          danger: '#f56565',
+          warning: '#f59e0b',
+          danger: '#ef4444',
         },
         fonts: {
           size: 'md',
@@ -33,7 +33,7 @@ import { AppService } from './app.service';
         width: '350px',
         try: {
           enabled: true,
-          position: 'auto', // Will be positioned on the right (opposite of sidebar)
+          position: 'auto',
           width: '450px',
           defaultExpanded: false,
         }
@@ -44,13 +44,6 @@ import { AppService } from './app.service';
             name: 'accessToken',
             value: '',
             description: 'JWT access token for API authentication',
-            type: 'token',
-            sensitive: true,
-          },
-          {
-            name: 'refreshToken',
-            value: '',
-            description: 'JWT refresh token for token renewal',
             type: 'token',
             sensitive: true,
           },
@@ -71,33 +64,29 @@ import { AppService } from './app.service';
         ],
         defaultTokens: {
           accessToken: '',
-          refreshToken: '',
           apiKey: '',
-          bearerToken: '',
         },
         headers: {
-          'X-Client-Version': '1.0.0',
-          'X-Platform': 'web',
-        },
-        queryParams: {
-          'version': 'v1',
-        },
+          'X-Client-Version': '3.0.0',
+          'Accept': 'application/json',
+        }
       },
       branding: {
-        favicon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-plain.svg',
+        favicon: 'https://nestjs.com/img/favicon.ico',
         logo: {
           src: 'https://nestjs.com/img/logo-small.svg',
-          alt: 'NestJS Logo',
-          height: '45px',
+          alt: 'NestJS API',
+          height: '40px',
           position: 'both',
           link: 'https://nestjs.com'
         },
         cover: {
-          src: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300&q=80',
-          alt: 'API Documentation Cover',
-          position: 'top',
-          height: '250px',
-          opacity: 0.9
+          src: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300&q=80',
+          alt: 'Auto-Structured API Documentation',
+          position: 'hero',
+          height: '300px',
+          overlay: true,
+          overlayColor: 'rgba(255, 108, 55, 0.8)'
         }
       }
     }),
