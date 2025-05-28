@@ -60,7 +60,7 @@ export class ZedocModule {
   }
 
   /**
-   * Helper method to set the Swagger document
+   * Helper method to set the Swagger document (for Swagger mode)
    * Call this after setting up Swagger in your application
    */
   static setSwaggerDocument(app: any, document: any): void {
@@ -72,6 +72,22 @@ export class ZedocModule {
       }
     } catch (error) {
       console.warn('⚠️ Could not set Swagger document for Zedoc:', error.message);
+    }
+  }
+
+  /**
+   * Helper method to configure structured documentation (for structured mode)
+   * Call this to update the configuration at runtime
+   */
+  static configure(app: any, config: DocumentationConfig): void {
+    try {
+      const documentationService = app.get(DocumentationService);
+      if (documentationService) {
+        documentationService.setConfig(config);
+        console.log('✅ Zedoc configuration updated');
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not configure Zedoc:', error.message);
     }
   }
 } 

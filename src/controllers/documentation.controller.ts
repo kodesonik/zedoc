@@ -13,30 +13,47 @@ export class DocumentationController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get API documentation' })
+  @ApiOperation({ summary: 'Get unified API documentation' })
   async getDocumentation(@Res() res: Response): Promise<void> {
     try {
-      // Try to get Swagger document from the application
-      let swaggerDoc = await this.swaggerIntegrationService.getSwaggerDocument();
+      const config = this.documentationService.getConfig();
       
-      // If no Swagger document found, use sample document
-      if (!swaggerDoc) {
-        swaggerDoc = this.swaggerIntegrationService.createSampleSwaggerDocument();
-      }
-      
-      // Generate documentation from Swagger JSON
-      const html = this.documentationService.generateDocumentationFromSwagger(swaggerDoc);
+      // Determine mode: if sections are provided, use structured mode
+      if (config.sections && config.sections.length > 0) {
+        // Structured mode - generate from configuration
+        const html = this.documentationService.generateStructuredDocumentation();
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
+      } else {
+        // Swagger mode - generate from Swagger document
+        let swaggerDoc = await this.swaggerIntegrationService.getSwaggerDocument();
+        
+        // If no Swagger document found, use sample document
+        if (!swaggerDoc) {
+          swaggerDoc = this.swaggerIntegrationService.createSampleSwaggerDocument();
+        }
+        
+        // Transform Swagger to endpoints and generate documentation
+        const endpoints = this.documentationService.transformSwaggerToEndpoints(swaggerDoc);
+        const html = this.documentationService.generateDocumentation(endpoints);
 
-      res.setHeader('Content-Type', 'text/html');
-      res.send(html);
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
+      }
     } catch (error) {
       console.error('Error generating documentation:', error);
       res.status(500).send('Error generating documentation');
     }
   }
 
+  @Get('config')
+  @ApiOperation({ summary: 'Get documentation configuration' })
+  getConfig() {
+    return this.documentationService.getConfig();
+  }
+
   @Get('json')
-  @ApiOperation({ summary: 'Get Swagger JSON' })
+  @ApiOperation({ summary: 'Get Swagger JSON (Swagger mode only)' })
   async getSwaggerJson(@Res() res: Response): Promise<void> {
     try {
       let swaggerDoc = await this.swaggerIntegrationService.getSwaggerDocument();
@@ -54,7 +71,7 @@ export class DocumentationController {
   }
 
   @Get('endpoints')
-  @ApiOperation({ summary: 'Get transformed endpoints' })
+  @ApiOperation({ summary: 'Get transformed endpoints (Swagger mode only)' })
   async getEndpoints(@Res() res: Response): Promise<void> {
     try {
       let swaggerDoc = await this.swaggerIntegrationService.getSwaggerDocument();

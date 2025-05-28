@@ -1,7 +1,5 @@
 export * from './zedoc.module';
-export * from './structured-zedoc.module';
 export * from './services/documentation.service';
-export * from './services/structured-documentation.service';
 export * from './services/swagger-integration.service';
 export * from './services/theme.service';
 export * from './services/sidebar.service';
@@ -10,5 +8,4 @@ export * from './services/environment.service';
 export * from './services/branding.service';
 export * from './decorators/api-doc.decorator';
 export * from './interfaces/documentation.interface';
-export * from './controllers/documentation.controller';
-export * from './controllers/structured-documentation.controller'; 
+export * from './controllers/documentation.controller'; 

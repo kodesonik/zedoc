@@ -12,6 +12,9 @@ export interface DocumentationConfig {
   sidebar?: SidebarConfig;
   environment?: EnvironmentConfig;
   branding?: BrandingConfig;
+  // Structured architecture support
+  sections?: SectionConfig[];
+  mode?: 'swagger' | 'structured' | 'auto'; // auto detects based on sections presence
 }
 
 export interface ThemeConfig {
@@ -237,6 +240,24 @@ export interface NewTemplateData {
   description: string;
   version?: string;
   sections: SectionConfig[];
+  theme?: ThemeConfig;
+  sidebar?: SidebarConfig;
+  environment?: EnvironmentConfig;
+  branding?: BrandingConfig;
+  tags?: string[];
+}
+
+// Unified template data that supports both modes
+export interface UnifiedTemplateData {
+  title: string;
+  description?: string;
+  version?: string;
+  mode: 'swagger' | 'structured';
+  // Swagger mode data
+  endpoints?: EndpointInfo[];
+  // Structured mode data
+  sections?: SectionConfig[];
+  // Common data
   theme?: ThemeConfig;
   sidebar?: SidebarConfig;
   environment?: EnvironmentConfig;

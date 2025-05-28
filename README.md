@@ -1,31 +1,30 @@
 # @kodesonik/zedoc
 
-A NestJS library for generating beautiful API documentation with Swagger integration, comprehensive theming, sidebar navigation, font customization, environment variables management, and interactive "Try It Out" functionality.
+A comprehensive NestJS library for generating beautiful, interactive API documentation with advanced theming, sidebar navigation, environment variables, and branding support.
 
-## Features
+## ✨ Features
 
-- 🚀 Easy integration with NestJS applications
-- 📚 Beautiful HTML documentation generation with Swagger integration
-- 🎨 Comprehensive theming system with 4 preset themes and full customization
-- 🔤 Advanced typography system with 3 font size presets and 3 font families
-- 🧭 Advanced sidebar navigation with search and filtering
-- 🌍 Environment variables management for authentication and configuration
-- 🔧 Interactive "Try It Out" panel for API testing
-- 📱 Fully responsive design for all devices
-- 🌙 Dark/light mode support
-- 🔍 Real-time search and tags filtering
-- 🎯 Tailwind CSS styling for modern UI
-- 🔧 Customizable Handlebars templates
+- **🔄 Unified Architecture**: Single module supporting both Swagger-based automatic extraction and structured manual configuration
+- **🎨 Advanced Theming**: 4 built-in themes (basic, postman, insomnia, swagger) with full customization
+- **🧭 Smart Sidebar**: Configurable navigation with search, filtering, and collapsible panels
+- **🔤 Typography System**: 3 font size presets and 3 font families with responsive design
+- **🌍 Environment Variables**: Comprehensive token management with 5 variable types
+- **🎯 Branding Support**: Favicon, logo, and cover image customization
+- **📱 Responsive Design**: Mobile-first approach with adaptive layouts
+- **🔒 Authentication**: Visual indicators and token management for secured endpoints
+- **⚡ Try It Out Panel**: Interactive API testing with environment variable integration
 
-## Installation
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 npm install @kodesonik/zedoc
 ```
 
-## Quick Start
+### Basic Setup (Swagger Mode)
 
-### 1. Import the module with comprehensive configuration
+For automatic documentation extraction from Swagger decorators:
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -86,7 +85,7 @@ import { ZedocModule } from '@kodesonik/zedoc';
 export class AppModule {}
 ```
 
-### 2. Set up Swagger integration
+### Set up Swagger integration
 
 ```typescript
 import { NestFactory } from '@nestjs/core';
@@ -114,363 +113,101 @@ async function bootstrap() {
 bootstrap();
 ```
 
-### 3. Use standard Swagger decorators
+### Use standard Swagger decorators
 
 ```typescript
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   @Get()
-  @ApiOperation({ 
-    summary: 'Get all users',
-    description: 'Retrieve a list of all users in the system'
-  })
+  @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of users' })
   findAll() {
     return [];
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiResponse({ status: 200, description: 'User details' })
-  findOne(@Param('id') id: string) {
+  @Post()
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  create(@Body() createUserDto: any) {
     return {};
   }
 }
 ```
 
-### 4. Access your documentation
+## 📚 Documentation Modes
 
-- **Zedoc Documentation**: Navigate to `/docs` for the beautiful themed documentation
-- **Swagger UI**: Navigate to `/api` for the standard Swagger interface
-- **Swagger JSON**: Navigate to `/api-json` for the raw Swagger document
+### Swagger Mode (Automatic)
 
-## 🎨 Theme Configuration
+Automatically extracts documentation from your existing Swagger decorators:
 
-### Preset Themes
+- ✅ **Zero Configuration**: Works with existing `@ApiTags`, `@ApiOperation`, etc.
+- ✅ **Real-time Updates**: Documentation updates as you modify decorators
+- ✅ **Type Safety**: Leverages TypeScript types and Swagger schemas
+- ✅ **Standard Compliance**: Uses OpenAPI/Swagger standards
 
-Choose from 4 beautiful preset themes:
+### Structured Mode (Manual)
 
-```typescript
-// Postman-inspired theme
-theme: { preset: 'postman', mode: 'light' }
-
-// Insomnia-inspired theme  
-theme: { preset: 'insomnia', mode: 'light' }
-
-// Swagger-inspired theme
-theme: { preset: 'swagger', mode: 'light' }
-
-// Basic clean theme (default)
-theme: { preset: 'basic', mode: 'light' }
-```
-
-### Dark Mode
-
-All themes support dark mode:
+Manually configure documentation with hierarchical organization:
 
 ```typescript
-theme: {
-  preset: 'postman',
-  mode: 'dark'  // or 'light'
-}
-```
-
-### Custom Colors
-
-Full color customization:
-
-```typescript
-theme: {
-  preset: 'custom',
-  mode: 'light',
-  colors: {
-    primary: '#ff6c37',
-    secondary: '#4a5568',
-    success: '#48bb78',
-    warning: '#ed8936',
-    danger: '#f56565',
-    background: '#ffffff',
-    surface: '#f8fafc',
-    text: '#1a1a1a',
-    textSecondary: '#6b7280',
-    border: '#e5e5e5'
-  }
-}
-```
-
-## 🔤 Font Configuration
-
-### Font Size Presets
-
-Choose from 3 carefully crafted size scales:
-
-```typescript
-// Small - Compact display
-fonts: { size: 'sm' }
-
-// Medium - Balanced (default)
-fonts: { size: 'md' }
-
-// Large - Accessibility focused
-fonts: { size: 'lg' }
-```
-
-### Font Family Options
-
-Select from 3 distinct font families:
-
-```typescript
-// Inter - Modern UI font
-fonts: { family: 'inter' }
-
-// Roboto - Google's signature font
-fonts: { family: 'roboto' }
-
-// System - Native OS fonts
-fonts: { family: 'system' }
-```
-
-### Complete Font Configuration
-
-```typescript
-theme: {
-  fonts: {
-    size: 'md',           // 'sm' | 'md' | 'lg' | 'custom'
-    family: 'inter',      // 'inter' | 'roboto' | 'system' | 'custom'
-    customSizes: {        // Optional custom sizes
-      base: '1.125rem',
-      lg: '1.375rem',
-      xl: '1.75rem'
-    },
-    customFamily: '"Poppins", sans-serif'  // Optional custom font
-  }
-}
-```
-
-## 🌍 Environment Variables Configuration
-
-### Basic Environment Setup
-
-```typescript
-environment: {
-  variables: [
+ZedocModule.forRoot({
+  title: 'Structured API Documentation',
+  description: 'Manually configured with sections and modules',
+  version: '1.0.0',
+  // Presence of sections triggers structured mode
+  sections: [
     {
-      name: 'accessToken',
-      value: '',
-      description: 'JWT access token for API authentication',
-      type: 'token',
-      sensitive: true,
-    },
-    {
-      name: 'apiKey',
-      value: '',
-      description: 'API key for service authentication',
-      type: 'token',
-      sensitive: true,
+      id: 'authentication',
+      name: 'Authentication',
+      modules: [
+        {
+          id: 'auth',
+          name: 'Authentication Module',
+          description: 'Handle user authentication and authorization',
+          endpoints: [
+            {
+              method: 'POST',
+              path: '/auth/login',
+              summary: 'User Login',
+              description: 'Authenticate user with email and password',
+              requiresAuth: false,
+              tags: ['auth', 'login'],
+              requestBody: {
+                email: 'user@example.com',
+                password: 'password123'
+              },
+              successData: {
+                accessToken: 'jwt_token_here',
+                user: { id: 1, email: 'user@example.com' }
+              },
+              successStatus: 200,
+              errorResponses: [
+                {
+                  status: 401,
+                  description: 'Invalid credentials',
+                  error: 'INVALID_CREDENTIALS',
+                  message: 'Email or password is incorrect'
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
-  ],
-  defaultTokens: {
-    accessToken: '',
-    refreshToken: '',
-    apiKey: '',
-    bearerToken: '',
-  },
-  headers: {
-    'X-Client-Version': '1.0.0',
-    'Accept': 'application/json',
-  },
-  queryParams: {
-    'version': 'v1',
-  }
-}
+  ]
+})
 ```
 
-### Variable Types
+- ✅ **Hierarchical Organization**: Sections → Modules → Endpoints
+- ✅ **Rich Metadata**: Detailed request/response examples
+- ✅ **Authentication Indicators**: Visual auth requirements
+- ✅ **Error Documentation**: Comprehensive error response examples
 
-**Token Variables (type: 'token')**
-- Automatically map to Authorization headers
-- Support for JWT, API keys, bearer tokens
-- Secure password input fields
-
-**Header Variables (type: 'header')**
-- Custom HTTP headers
-- Client identification and versioning
-
-**Query Variables (type: 'query')**
-- Default query parameters
-- Pagination and filter settings
-
-**Body Variables (type: 'body')**
-- Request body templates
-- Default payloads for testing
-
-**Custom Variables (type: 'custom')**
-- Configuration values and URLs
-- Custom application settings
-
-### Environment Features
-
-- **🔐 Secure Storage**: Sensitive variables use password fields
-- **💾 Persistence**: Variables saved to localStorage
-- **🔄 Auto-Apply**: Smart header mapping for tokens
-- **🎯 Try Panel Integration**: Seamless API testing
-- **🌍 Multi-Environment**: Support for dev/staging/prod configs
-
-## 🎨 Branding Configuration
-
-### Basic Branding Setup
-
-```typescript
-branding: {
-  favicon: '/favicon.ico',
-  logo: {
-    src: '/logo.svg',
-    alt: 'Company Logo',
-    height: '40px',
-    position: 'header',
-    link: 'https://company.com'
-  },
-  cover: {
-    src: '/hero-image.jpg',
-    alt: 'API Documentation',
-    position: 'top',
-    height: '300px',
-    opacity: 0.9
-  }
-}
-```
-
-### Favicon Configuration
-
-```typescript
-// Different favicon formats
-branding: {
-  favicon: '/favicon.ico',     // ICO format
-  favicon: '/favicon.png',     // PNG format  
-  favicon: '/favicon.svg',     // SVG format (recommended)
-  favicon: 'https://cdn.example.com/favicon.svg'  // External URL
-}
-```
-
-### Logo Configuration
-
-```typescript
-// Header logo
-logo: {
-  src: '/logo.svg',
-  alt: 'Company Logo',
-  height: '40px',
-  position: 'header',
-  link: 'https://company.com'
-}
-
-// Sidebar logo
-logo: {
-  src: '/logo-white.svg',
-  alt: 'Company Logo',
-  height: '35px',
-  position: 'sidebar'
-}
-
-// Both header and sidebar
-logo: {
-  src: '/logo.svg',
-  alt: 'Company Logo',
-  height: '40px',
-  position: 'both',
-  link: '/'
-}
-```
-
-### Cover Image Configuration
-
-```typescript
-// Top banner
-cover: {
-  src: '/api-banner.jpg',
-  alt: 'API Documentation',
-  position: 'top',
-  height: '300px',
-  opacity: 0.9
-}
-
-// Hero section with overlay
-cover: {
-  src: '/hero-background.jpg',
-  alt: 'API Hero',
-  position: 'hero',
-  height: '400px',
-  overlay: true,
-  overlayColor: 'rgba(59, 130, 246, 0.7)'
-}
-
-// Background image
-cover: {
-  src: '/subtle-pattern.svg',
-  position: 'background',
-  opacity: 0.1
-}
-```
-
-### Branding Features
-
-- **🔖 Favicon Support**: ICO, PNG, SVG formats with automatic HTML generation
-- **🏷️ Logo Positioning**: Header, sidebar, or both positions with responsive design
-- **🖼️ Cover Images**: Top banner, hero section, or background with overlay support
-- **🔗 Smart Linking**: Optional logo links for enhanced navigation
-- **📱 Mobile Responsive**: Automatic scaling and optimization for all devices
-- **🎨 Theme Integration**: Seamless integration with all theme presets
-
-## 🧭 Sidebar Configuration
-
-### Basic Sidebar Setup
-
-```typescript
-sidebar: {
-  position: 'left',        // 'left' | 'right' | 'none'
-  searchbar: true,         // Enable search functionality
-  tagsFilter: true,        // Enable tags filtering
-  collapsible: true,       // Allow sidebar collapse
-  width: '320px',          // Sidebar width
-  try: {
-    enabled: true,         // Enable "Try It Out" panel
-    position: 'auto',      // Auto-position opposite to sidebar
-    width: '400px',        // Try panel width
-    defaultExpanded: false // Start collapsed
-  }
-}
-```
-
-### Sidebar Features
-
-- **🔍 Real-time Search**: Search through endpoints, methods, and descriptions
-- **🏷️ Tags Filtering**: Filter endpoints by Swagger tags
-- **📱 Mobile Responsive**: Auto-collapse on mobile devices
-- **🎯 Smart Navigation**: Click endpoints to scroll and highlight
-- **⚙️ Try It Out Panel**: Interactive API testing with environment variables
-
-### Layout Options
-
-```typescript
-// Classic left sidebar + right try panel
-sidebar: { position: 'left', try: { enabled: true, position: 'auto' } }
-
-// Right sidebar + left try panel  
-sidebar: { position: 'right', try: { enabled: true, position: 'auto' } }
-
-// No sidebar, just try panel
-sidebar: { position: 'none', try: { enabled: true, position: 'right' } }
-
-// Full-width documentation
-sidebar: { position: 'none', try: { enabled: false } }
-```
-
-## Configuration
+## 🎨 Advanced Configuration
 
 ### Complete Configuration Example
 
@@ -542,6 +279,24 @@ ZedocModule.forRoot({
       'X-Client-Version': '1.0.0',
       'Accept': 'application/json',
     }
+  },
+  branding: {
+    favicon: '/favicon.ico',
+    logo: {
+      src: '/logo.svg',
+      alt: 'Company Logo',
+      height: '40px',
+      position: 'both',
+      link: 'https://company.com'
+    },
+    cover: {
+      src: '/hero-image.jpg',
+      alt: 'API Documentation',
+      position: 'hero',
+      height: '300px',
+      overlay: true,
+      overlayColor: 'rgba(0, 0, 0, 0.5)'
+    }
   }
 })
 ```
@@ -603,228 +358,101 @@ ZedocModule.forRootAsync({
 - **[Environment Variables Guide](ENVIRONMENT_CONFIGURATION.md)** - Authentication and configuration management
 - **[Branding Configuration Guide](BRANDING_CONFIGURATION.md)** - Favicon, logo, and cover image customization
 
-## API Reference
+## 🔗 API Endpoints
 
-### Interfaces
+Once configured, Zedoc provides these endpoints:
 
-#### DocumentationConfig
+- `GET /docs` - Main documentation interface (unified for both modes)
+- `GET /docs/config` - Current configuration (JSON)
+- `GET /docs/json` - Swagger JSON (Swagger mode only)
+- `GET /docs/endpoints` - Transformed endpoints (Swagger mode only)
 
+## 🎯 Use Cases
+
+### For API Documentation
 ```typescript
-interface DocumentationConfig {
-  title?: string;
-  description?: string;
-  version?: string;
-  basePath?: string;
-  tags?: string[];
-  servers?: Array<{
-    url: string;
-    description?: string;
-  }>;
-  theme?: ThemeConfig;
-  sidebar?: SidebarConfig;
-  environment?: EnvironmentConfig;
+// Focus on clean, comprehensive documentation
+sidebar: {
+  position: 'left',
+  width: '320px',
+  searchbar: true,
+  tagsFilter: true,
+  collapsible: true,
+  try: {
+    enabled: false  // Focus on documentation
+  }
 }
 ```
 
-#### ThemeConfig
-
+### For Interactive Testing
 ```typescript
-interface ThemeConfig {
-  preset?: 'basic' | 'postman' | 'insomnia' | 'swagger' | 'custom';
-  mode?: 'light' | 'dark';
-  colors?: ThemeColors;
-  fonts?: FontConfig;
+// Enable full interactive capabilities
+sidebar: {
+  position: 'left',
+  width: '300px',
+  searchbar: true,
+  tagsFilter: true,
+  collapsible: true,
+  try: {
+    enabled: true,
+    position: 'right',
+    width: '450px',
+    defaultExpanded: false
+  }
 }
 ```
 
-#### FontConfig
-
+### For Mobile-First
 ```typescript
-interface FontConfig {
-  size?: 'sm' | 'md' | 'lg' | 'custom';
-  family?: 'inter' | 'roboto' | 'system' | 'custom';
-  customSizes?: FontSizes;
-  customFamily?: string;
+// Optimize for mobile devices
+sidebar: {
+  position: 'left',
+  width: '280px',
+  searchbar: true,
+  tagsFilter: false,  // Simplify mobile experience
+  collapsible: true,  // Must-have for mobile
+  try: {
+    enabled: false    // Avoid clutter on mobile
+  }
 }
 ```
 
-#### SidebarConfig
+## 🚀 Migration Guide
+
+### From Separate Modules
+
+If you were using `StructuredZedocModule`, simply replace it with `ZedocModule`:
 
 ```typescript
-interface SidebarConfig {
-  position?: 'left' | 'right' | 'none';
-  try?: TryPanelConfig;
-  searchbar?: boolean;
-  tagsFilter?: boolean;
-  collapsible?: boolean;
-  width?: string;
-}
+// Before
+import { StructuredZedocModule } from '@kodesonik/zedoc';
+StructuredZedocModule.forRoot({ sections: [...] })
+
+// After
+import { ZedocModule } from '@kodesonik/zedoc';
+ZedocModule.forRoot({ sections: [...] })  // Auto-detects structured mode
 ```
 
-#### EnvironmentConfig
+### Mode Detection
 
-```typescript
-interface EnvironmentConfig {
-  variables?: EnvironmentVariable[];
-  defaultTokens?: {
-    accessToken?: string;
-    refreshToken?: string;
-    apiKey?: string;
-    bearerToken?: string;
-  };
-  headers?: Record<string, string>;
-  queryParams?: Record<string, string>;
-}
-```
+The unified module automatically detects the mode:
 
-#### EnvironmentVariable
+- **Structured Mode**: When `sections` array is provided
+- **Swagger Mode**: When no `sections` are provided (default)
+- **Explicit Mode**: Set `mode: 'swagger'` or `mode: 'structured'` to override auto-detection
 
-```typescript
-interface EnvironmentVariable {
-  name: string;
-  value: string;
-  description?: string;
-  type?: 'token' | 'header' | 'query' | 'body' | 'custom';
-  sensitive?: boolean;
-}
-```
+## 🤝 Contributing
 
-### Services
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-#### DocumentationService
+## 📄 License
 
-The main service for generating documentation from Swagger.
+This project is licensed under the MIT License.
 
-```typescript
-class DocumentationService {
-  setConfig(config: DocumentationConfig): void;
-  getConfig(): DocumentationConfig;
-  generateDocumentationFromSwagger(swaggerDoc: any): string;
-  transformSwaggerToEndpoints(swaggerDoc: any): EndpointInfo[];
-}
-```
+## 🙏 Acknowledgments
 
-#### ThemeService
-
-Service for managing themes and generating theme-specific CSS.
-
-```typescript
-class ThemeService {
-  getResolvedTheme(themeConfig?: ThemeConfig): ThemeColors;
-  generateThemeCSS(themeConfig?: ThemeConfig): string;
-  generateMethodColors(themeConfig?: ThemeConfig): string;
-}
-```
-
-#### FontService
-
-Service for managing typography and font configurations.
-
-```typescript
-class FontService {
-  getResolvedFontConfig(fontConfig?: FontConfig): Required<FontConfig>;
-  generateFontCSS(fontConfig?: FontConfig): string;
-  generateResponsiveFontCSS(fontConfig?: FontConfig): string;
-  getFontClasses(fontConfig?: FontConfig): Record<string, string>;
-}
-```
-
-#### SidebarService
-
-Service for managing sidebar functionality and layout.
-
-```typescript
-class SidebarService {
-  getResolvedSidebarConfig(sidebarConfig?: SidebarConfig): SidebarConfig;
-  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: EndpointInfo[], tags: string[]): string;
-  generateSidebarCSS(sidebarConfig: SidebarConfig): string;
-}
-```
-
-#### EnvironmentService
-
-Service for managing environment variables and authentication.
-
-```typescript
-class EnvironmentService {
-  getResolvedEnvironmentConfig(envConfig?: EnvironmentConfig): Required<EnvironmentConfig>;
-  getVariablesByType(envConfig?: EnvironmentConfig, type?: string): EnvironmentVariable[];
-  getAuthHeaders(envConfig?: EnvironmentConfig): Record<string, string>;
-  generateEnvironmentHTML(envConfig?: EnvironmentConfig): string;
-  generateEnvironmentJS(): string;
-}
-```
-
-## Custom Templates
-
-You can customize the documentation appearance by providing your own Handlebars templates. The library provides several helpers for theme, font, sidebar, and environment integration.
-
-### Available Handlebars Helpers
-
-```handlebars
-<!-- Theme helpers -->
-{{{themeCSS}}}
-{{{methodColors}}}
-{{themeClass 'body'}}
-
-<!-- Font helpers -->
-{{{fontCSS}}}
-{{{responsiveFontCSS}}}
-{{fontClass 'title'}}
-
-<!-- Sidebar helpers -->
-{{{sidebarHTML}}}
-{{{tryPanelHTML}}}
-{{{sidebarCSS}}}
-{{{sidebarJS}}}
-
-<!-- Environment helpers -->
-{{{environmentHTML}}}
-{{{environmentJS}}}
-
-<!-- Utility helpers -->
-{{endpointId endpoint}}
-{{json object}}
-{{uppercase string}}
-{{lowercase string}}
-```
-
-## Migration from v1.x
-
-If you're upgrading from v1.x, the library now uses Swagger as the foundation instead of custom decorators:
-
-### Before (v1.x)
-```typescript
-@ApiDoc({
-  summary: 'Get users',
-  tags: ['Users']
-})
-```
-
-### After (v2.x)
-```typescript
-@ApiOperation({ summary: 'Get users' })
-@ApiTags('users')
-```
-
-The library automatically extracts documentation from your existing Swagger setup!
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support, please open an issue on [GitHub](https://github.com/kodesonik/zedoc/issues).
-
----
-
-**@kodesonik/zedoc** - Beautiful API documentation made simple! 🎨✨ 
+Built with ❤️ using:
+- [NestJS](https://nestjs.com/) - Progressive Node.js framework
+- [Swagger](https://swagger.io/) - API documentation standard
+- [Handlebars](https://handlebarsjs.com/) - Template engine
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework 

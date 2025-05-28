@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { StructuredZedocModule } from '@kodesonik/zedoc';
+import { ZedocModule } from '@kodesonik/zedoc';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
   imports: [
-    StructuredZedocModule.forRoot({
-      title: 'Structured API Documentation',
-      description: 'Demonstrating the new structured architecture with sections, modules, and environment variables',
+    ZedocModule.forRoot({
+      title: 'Unified API Documentation - Structured Mode',
+      description: 'Demonstrating the unified Zedoc module with structured mode (manual configuration)',
       version: '3.0.0',
       theme: {
         preset: 'insomnia',
@@ -95,20 +95,21 @@ import { AppService } from './app.service';
         favicon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
         logo: {
           src: 'https://nestjs.com/img/logo-small.svg',
-          alt: 'Structured API Logo',
+          alt: 'Unified API Logo',
           height: '50px',
           position: 'both',
           link: 'https://nestjs.com'
         },
         cover: {
           src: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=300&q=80',
-          alt: 'Structured API Documentation',
+          alt: 'Unified API Documentation',
           position: 'hero',
           height: '350px',
           overlay: true,
           overlayColor: 'rgba(99, 102, 241, 0.8)'
         }
       },
+      // Structured mode configuration - presence of sections triggers structured mode
       sections: [
         {
           id: 'authentication',
@@ -179,18 +180,6 @@ import { AppService } from './app.service';
                       message: 'Refresh token is invalid or expired'
                     }
                   ]
-                },
-                {
-                  method: 'POST',
-                  path: '/auth/logout',
-                  summary: 'User Logout',
-                  description: 'Logout user and invalidate tokens',
-                  requiresAuth: true,
-                  tags: ['auth', 'logout'],
-                  successData: {
-                    message: 'Logout successful'
-                  },
-                  successStatus: 200
                 }
               ]
             }
@@ -248,41 +237,6 @@ import { AppService } from './app.service';
                   ]
                 },
                 {
-                  method: 'GET',
-                  path: '/users/:id',
-                  summary: 'Get User by ID',
-                  description: 'Retrieve a specific user by their ID',
-                  requiresAuth: true,
-                  tags: ['users', 'detail'],
-                  successData: {
-                    id: 1,
-                    email: 'user@example.com',
-                    name: 'John Doe',
-                    profile: {
-                      avatar: 'https://example.com/avatar.jpg',
-                      bio: 'Software developer',
-                      location: 'New York, NY'
-                    },
-                    createdAt: '2024-01-01T00:00:00Z',
-                    updatedAt: '2024-01-15T00:00:00Z'
-                  },
-                  successStatus: 200,
-                  errorResponses: [
-                    {
-                      status: 404,
-                      description: 'User not found',
-                      error: 'USER_NOT_FOUND',
-                      message: 'User with the specified ID does not exist'
-                    },
-                    {
-                      status: 401,
-                      description: 'Unauthorized',
-                      error: 'UNAUTHORIZED',
-                      message: 'Authentication required'
-                    }
-                  ]
-                },
-                {
                   method: 'POST',
                   path: '/users',
                   summary: 'Create New User',
@@ -312,134 +266,6 @@ import { AppService } from './app.service';
                       description: 'Validation error',
                       error: 'VALIDATION_ERROR',
                       message: 'Email is already in use'
-                    },
-                    {
-                      status: 401,
-                      description: 'Unauthorized',
-                      error: 'UNAUTHORIZED',
-                      message: 'Admin privileges required'
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              id: 'profiles',
-              name: 'User Profiles',
-              description: 'Manage user profile information',
-              endpoints: [
-                {
-                  method: 'PUT',
-                  path: '/users/:id/profile',
-                  summary: 'Update User Profile',
-                  description: 'Update user profile information',
-                  requiresAuth: true,
-                  tags: ['users', 'profile', 'update'],
-                  requestBody: {
-                    avatar: 'https://example.com/new-avatar.jpg',
-                    bio: 'Updated bio',
-                    location: 'Los Angeles, CA',
-                    website: 'https://johndoe.com'
-                  },
-                  successData: {
-                    id: 1,
-                    profile: {
-                      avatar: 'https://example.com/new-avatar.jpg',
-                      bio: 'Updated bio',
-                      location: 'Los Angeles, CA',
-                      website: 'https://johndoe.com'
-                    },
-                    updatedAt: '2024-01-20T00:00:00Z'
-                  },
-                  successMessage: 'Profile updated successfully',
-                  successStatus: 200,
-                  errorResponses: [
-                    {
-                      status: 403,
-                      description: 'Forbidden',
-                      error: 'FORBIDDEN',
-                      message: 'You can only update your own profile'
-                    },
-                    {
-                      status: 404,
-                      description: 'User not found',
-                      error: 'USER_NOT_FOUND',
-                      message: 'User with the specified ID does not exist'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 'products',
-          name: 'Product Management',
-          modules: [
-            {
-              id: 'products',
-              name: 'Products Module',
-              description: 'Manage product catalog and inventory',
-              endpoints: [
-                {
-                  method: 'GET',
-                  path: '/products',
-                  summary: 'Get All Products',
-                  description: 'Retrieve a list of all products with filtering and pagination',
-                  requiresAuth: false,
-                  tags: ['products', 'catalog'],
-                  successData: {
-                    products: [
-                      {
-                        id: 1,
-                        name: 'Laptop Pro',
-                        description: 'High-performance laptop for professionals',
-                        price: 1299.99,
-                        category: 'Electronics',
-                        inStock: true,
-                        images: ['https://example.com/laptop1.jpg']
-                      }
-                    ],
-                    pagination: {
-                      page: 1,
-                      limit: 20,
-                      total: 50,
-                      totalPages: 3
-                    }
-                  },
-                  successStatus: 200
-                },
-                {
-                  method: 'POST',
-                  path: '/products',
-                  summary: 'Create New Product',
-                  description: 'Add a new product to the catalog',
-                  requiresAuth: true,
-                  tags: ['products', 'create', 'admin'],
-                  requestBody: {
-                    name: 'New Product',
-                    description: 'Product description',
-                    price: 99.99,
-                    category: 'Electronics',
-                    images: ['https://example.com/product.jpg']
-                  },
-                  successData: {
-                    id: 2,
-                    name: 'New Product',
-                    description: 'Product description',
-                    price: 99.99,
-                    category: 'Electronics',
-                    inStock: true,
-                    createdAt: '2024-01-20T00:00:00Z'
-                  },
-                  successMessage: 'Product created successfully',
-                  successStatus: 201,
-                  errorResponses: [
-                    {
-                      status: 400,
-                      description: 'Validation error',
-                      error: 'VALIDATION_ERROR',
-                      message: 'Product name is required'
                     },
                     {
                       status: 401,
