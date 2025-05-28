@@ -7,8 +7,8 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     ZedocModule.forRoot({
-      title: 'Zedoc Test API with Fonts',
-      description: 'Demonstrating font, sidebar and theme capabilities of @kodesonik/zedoc library',
+      title: 'Zedoc Test API with Environment Variables',
+      description: 'Demonstrating environment variables, font, sidebar and theme capabilities of @kodesonik/zedoc library',
       version: '2.0.0',
       theme: {
         preset: 'postman',
@@ -37,6 +37,51 @@ import { AppService } from './app.service';
           width: '450px',
           defaultExpanded: false,
         }
+      },
+      environment: {
+        variables: [
+          {
+            name: 'accessToken',
+            value: '',
+            description: 'JWT access token for API authentication',
+            type: 'token',
+            sensitive: true,
+          },
+          {
+            name: 'refreshToken',
+            value: '',
+            description: 'JWT refresh token for token renewal',
+            type: 'token',
+            sensitive: true,
+          },
+          {
+            name: 'apiKey',
+            value: '',
+            description: 'API key for service authentication',
+            type: 'token',
+            sensitive: true,
+          },
+          {
+            name: 'userId',
+            value: '123',
+            description: 'Default user ID for testing',
+            type: 'query',
+            sensitive: false,
+          },
+        ],
+        defaultTokens: {
+          accessToken: '',
+          refreshToken: '',
+          apiKey: '',
+          bearerToken: '',
+        },
+        headers: {
+          'X-Client-Version': '1.0.0',
+          'X-Platform': 'web',
+        },
+        queryParams: {
+          'version': 'v1',
+        },
       }
     }),
   ],

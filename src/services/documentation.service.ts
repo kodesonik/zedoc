@@ -3,6 +3,7 @@ import { DocumentationConfig, TemplateData, EndpointInfo, ParameterInfo, Respons
 import { ThemeService } from './theme.service';
 import { SidebarService } from './sidebar.service';
 import { FontService } from './font.service';
+import { EnvironmentService } from './environment.service';
 import * as hbs from 'hbs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -16,6 +17,7 @@ export class DocumentationService {
     private readonly themeService: ThemeService,
     private readonly sidebarService: SidebarService,
     private readonly fontService: FontService,
+    private readonly environmentService: EnvironmentService,
   ) {
     this.config = { ...this.config, ...config };
     this.setupHandlebars();
@@ -74,7 +76,8 @@ export class DocumentationService {
 
     hbs.registerHelper('tryPanelHTML', (context: any) => {
       const sidebarConfig = this.sidebarService.getResolvedSidebarConfig(context.data.root.sidebar);
-      return new hbs.SafeString(this.sidebarService.generateTryPanelHTML(sidebarConfig.try!));
+      const environmentConfig = context.data.root.environment;
+      return new hbs.SafeString(this.sidebarService.generateTryPanelHTML(sidebarConfig.try!, environmentConfig));
     });
 
     hbs.registerHelper('sidebarCSS', (context: any) => {
@@ -84,6 +87,16 @@ export class DocumentationService {
 
     hbs.registerHelper('sidebarJS', () => {
       return new hbs.SafeString(this.sidebarService.generateSidebarJS());
+    });
+
+    // Environment-related helpers
+    hbs.registerHelper('environmentHTML', (context: any) => {
+      const environmentConfig = context.data.root.environment;
+      return new hbs.SafeString(this.environmentService.generateEnvironmentHTML(environmentConfig));
+    });
+
+    hbs.registerHelper('environmentJS', () => {
+      return new hbs.SafeString(this.environmentService.generateEnvironmentJS());
     });
 
     hbs.registerHelper('endpointId', (endpoint: EndpointInfo) => {
@@ -204,6 +217,7 @@ export class DocumentationService {
       endpoints,
       theme: this.config.theme,
       sidebar: this.config.sidebar,
+      environment: this.config.environment,
       tags,
     };
 
@@ -227,6 +241,7 @@ export class DocumentationService {
       endpoints,
       theme: this.config.theme,
       sidebar: this.config.sidebar,
+      environment: this.config.environment,
       tags,
     };
 

@@ -1,6 +1,6 @@
 # @kodesonik/zedoc
 
-A NestJS library for generating beautiful API documentation with Swagger integration, comprehensive theming, sidebar navigation, font customization, and interactive "Try It Out" functionality.
+A NestJS library for generating beautiful API documentation with Swagger integration, comprehensive theming, sidebar navigation, font customization, environment variables management, and interactive "Try It Out" functionality.
 
 ## Features
 
@@ -9,6 +9,7 @@ A NestJS library for generating beautiful API documentation with Swagger integra
 - 🎨 Comprehensive theming system with 4 preset themes and full customization
 - 🔤 Advanced typography system with 3 font size presets and 3 font families
 - 🧭 Advanced sidebar navigation with search and filtering
+- 🌍 Environment variables management for authentication and configuration
 - 🔧 Interactive "Try It Out" panel for API testing
 - 📱 Fully responsive design for all devices
 - 🌙 Dark/light mode support
@@ -51,6 +52,32 @@ import { ZedocModule } from '@kodesonik/zedoc';
         try: {
           enabled: true,
           position: 'auto'
+        }
+      },
+      environment: {
+        variables: [
+          {
+            name: 'accessToken',
+            value: '',
+            description: 'JWT access token for API authentication',
+            type: 'token',
+            sensitive: true,
+          },
+          {
+            name: 'apiKey',
+            value: '',
+            description: 'API key for service authentication',
+            type: 'token',
+            sensitive: true,
+          }
+        ],
+        defaultTokens: {
+          accessToken: '',
+          apiKey: '',
+        },
+        headers: {
+          'X-Client-Version': '1.0.0',
+          'Accept': 'application/json',
         }
       }
     }),
@@ -225,6 +252,75 @@ theme: {
 }
 ```
 
+## 🌍 Environment Variables Configuration
+
+### Basic Environment Setup
+
+```typescript
+environment: {
+  variables: [
+    {
+      name: 'accessToken',
+      value: '',
+      description: 'JWT access token for API authentication',
+      type: 'token',
+      sensitive: true,
+    },
+    {
+      name: 'apiKey',
+      value: '',
+      description: 'API key for service authentication',
+      type: 'token',
+      sensitive: true,
+    }
+  ],
+  defaultTokens: {
+    accessToken: '',
+    refreshToken: '',
+    apiKey: '',
+    bearerToken: '',
+  },
+  headers: {
+    'X-Client-Version': '1.0.0',
+    'Accept': 'application/json',
+  },
+  queryParams: {
+    'version': 'v1',
+  }
+}
+```
+
+### Variable Types
+
+**Token Variables (type: 'token')**
+- Automatically map to Authorization headers
+- Support for JWT, API keys, bearer tokens
+- Secure password input fields
+
+**Header Variables (type: 'header')**
+- Custom HTTP headers
+- Client identification and versioning
+
+**Query Variables (type: 'query')**
+- Default query parameters
+- Pagination and filter settings
+
+**Body Variables (type: 'body')**
+- Request body templates
+- Default payloads for testing
+
+**Custom Variables (type: 'custom')**
+- Configuration values and URLs
+- Custom application settings
+
+### Environment Features
+
+- **🔐 Secure Storage**: Sensitive variables use password fields
+- **💾 Persistence**: Variables saved to localStorage
+- **🔄 Auto-Apply**: Smart header mapping for tokens
+- **🎯 Try Panel Integration**: Seamless API testing
+- **🌍 Multi-Environment**: Support for dev/staging/prod configs
+
 ## 🧭 Sidebar Configuration
 
 ### Basic Sidebar Setup
@@ -251,7 +347,7 @@ sidebar: {
 - **🏷️ Tags Filtering**: Filter endpoints by Swagger tags
 - **📱 Mobile Responsive**: Auto-collapse on mobile devices
 - **🎯 Smart Navigation**: Click endpoints to scroll and highlight
-- **⚙️ Try It Out Panel**: Interactive API testing (positioned automatically)
+- **⚙️ Try It Out Panel**: Interactive API testing with environment variables
 
 ### Layout Options
 
@@ -315,6 +411,32 @@ ZedocModule.forRoot({
       width: '450px',
       defaultExpanded: false
     }
+  },
+  environment: {
+    variables: [
+      {
+        name: 'accessToken',
+        value: '',
+        description: 'JWT access token for API authentication',
+        type: 'token',
+        sensitive: true,
+      },
+      {
+        name: 'userId',
+        value: '123',
+        description: 'Default user ID for testing',
+        type: 'query',
+        sensitive: false,
+      }
+    ],
+    defaultTokens: {
+      accessToken: process.env.DEFAULT_ACCESS_TOKEN || '',
+      apiKey: process.env.DEFAULT_API_KEY || '',
+    },
+    headers: {
+      'X-Client-Version': '1.0.0',
+      'Accept': 'application/json',
+    }
   }
 })
 ```
@@ -344,6 +466,23 @@ ZedocModule.forRootAsync({
           enabled: isDevelopment,  // Only in development
           defaultExpanded: isDevelopment
         }
+      },
+      environment: {
+        variables: [
+          {
+            name: 'accessToken',
+            value: isDevelopment ? configService.get('DEV_ACCESS_TOKEN') : '',
+            description: 'JWT access token',
+            type: 'token',
+            sensitive: true,
+          }
+        ],
+        defaultTokens: {
+          accessToken: configService.get('DEFAULT_ACCESS_TOKEN'),
+        },
+        headers: {
+          'X-Environment': isDevelopment ? 'development' : 'production',
+        }
       }
     };
   },
@@ -356,6 +495,7 @@ ZedocModule.forRootAsync({
 - **[Theme Configuration Guide](THEME_EXAMPLES.md)** - Complete theming documentation
 - **[Sidebar Configuration Guide](SIDEBAR_CONFIGURATION.md)** - Comprehensive sidebar setup
 - **[Font Configuration Guide](FONT_CONFIGURATION.md)** - Typography and font customization
+- **[Environment Variables Guide](ENVIRONMENT_CONFIGURATION.md)** - Authentication and configuration management
 
 ## API Reference
 
@@ -376,6 +516,7 @@ interface DocumentationConfig {
   }>;
   theme?: ThemeConfig;
   sidebar?: SidebarConfig;
+  environment?: EnvironmentConfig;
 }
 ```
 
@@ -411,6 +552,34 @@ interface SidebarConfig {
   tagsFilter?: boolean;
   collapsible?: boolean;
   width?: string;
+}
+```
+
+#### EnvironmentConfig
+
+```typescript
+interface EnvironmentConfig {
+  variables?: EnvironmentVariable[];
+  defaultTokens?: {
+    accessToken?: string;
+    refreshToken?: string;
+    apiKey?: string;
+    bearerToken?: string;
+  };
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string>;
+}
+```
+
+#### EnvironmentVariable
+
+```typescript
+interface EnvironmentVariable {
+  name: string;
+  value: string;
+  description?: string;
+  type?: 'token' | 'header' | 'query' | 'body' | 'custom';
+  sensitive?: boolean;
 }
 ```
 
@@ -466,9 +635,23 @@ class SidebarService {
 }
 ```
 
+#### EnvironmentService
+
+Service for managing environment variables and authentication.
+
+```typescript
+class EnvironmentService {
+  getResolvedEnvironmentConfig(envConfig?: EnvironmentConfig): Required<EnvironmentConfig>;
+  getVariablesByType(envConfig?: EnvironmentConfig, type?: string): EnvironmentVariable[];
+  getAuthHeaders(envConfig?: EnvironmentConfig): Record<string, string>;
+  generateEnvironmentHTML(envConfig?: EnvironmentConfig): string;
+  generateEnvironmentJS(): string;
+}
+```
+
 ## Custom Templates
 
-You can customize the documentation appearance by providing your own Handlebars templates. The library provides several helpers for theme, font, and sidebar integration.
+You can customize the documentation appearance by providing your own Handlebars templates. The library provides several helpers for theme, font, sidebar, and environment integration.
 
 ### Available Handlebars Helpers
 
@@ -488,6 +671,10 @@ You can customize the documentation appearance by providing your own Handlebars 
 {{{tryPanelHTML}}}
 {{{sidebarCSS}}}
 {{{sidebarJS}}}
+
+<!-- Environment helpers -->
+{{{environmentHTML}}}
+{{{environmentJS}}}
 
 <!-- Utility helpers -->
 {{endpointId endpoint}}

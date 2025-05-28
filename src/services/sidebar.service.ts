@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { SidebarConfig, TryPanelConfig, EndpointInfo } from '../interfaces/documentation.interface';
+import { SidebarConfig, TryPanelConfig, EndpointInfo, EnvironmentConfig } from '../interfaces/documentation.interface';
+import { EnvironmentService } from './environment.service';
 
 @Injectable()
 export class SidebarService {
+  constructor(private readonly environmentService: EnvironmentService) {}
+
   /**
    * Get resolved sidebar configuration with defaults
    */
@@ -180,30 +183,108 @@ export class SidebarService {
   }
 
   /**
-   * Generate try panel HTML
+   * Generate try panel HTML with environment variables support
    */
-  generateTryPanelHTML(tryConfig: TryPanelConfig): string {
+  generateTryPanelHTML(tryConfig: TryPanelConfig, environmentConfig?: EnvironmentConfig): string {
     if (!tryConfig.enabled) {
       return '';
     }
 
-    const panelClass = `try-panel-${tryConfig.position}`;
-    const expandedClass = tryConfig.defaultExpanded ? 'expanded' : 'collapsed';
+    const position = tryConfig.position || 'right';
+    const width = tryConfig.width || '400px';
+    const defaultExpanded = tryConfig.defaultExpanded ? 'true' : 'false';
+
+    const environmentHTML = this.environmentService.generateEnvironmentHTML(environmentConfig);
 
     return `
-      <div id="zedoc-try-panel" class="${panelClass} ${expandedClass}" style="width: ${tryConfig.width}">
+      <div id="try-panel" class="try-panel try-panel-${position}" style="width: ${width};" data-default-expanded="${defaultExpanded}">
         <div class="try-panel-header">
-          <h3 class="try-panel-title">Try It Out</h3>
-          <button id="try-panel-toggle" class="try-panel-toggle">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <polyline points="6,9 12,15 18,9"></polyline>
-            </svg>
+          <h3 class="try-panel-title">🧪 Try It Out</h3>
+          <button id="try-panel-toggle" class="try-panel-toggle" aria-label="Toggle try panel">
+            <span class="try-panel-toggle-icon">◀</span>
           </button>
         </div>
         
         <div class="try-panel-content">
-          <div id="try-panel-form">
-            <p class="try-panel-placeholder">Select an endpoint to try it out</p>
+          ${environmentHTML}
+          
+          <div id="try-panel-endpoint" class="try-endpoint-section" style="display: none;">
+            <div class="endpoint-header p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-3 mb-2">
+                <span id="try-method" class="method-badge"></span>
+                <code id="try-path" class="endpoint-path"></code>
+              </div>
+              <p id="try-summary" class="text-sm text-gray-600 dark:text-gray-400"></p>
+            </div>
+            
+            <div class="endpoint-form p-4 space-y-4">
+              <div id="try-parameters" class="parameters-section" style="display: none;">
+                <h4 class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Parameters</h4>
+                <div id="try-parameters-list" class="space-y-3"></div>
+              </div>
+              
+              <div id="try-headers" class="headers-section">
+                <h4 class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Headers</h4>
+                <div id="try-headers-list" class="space-y-2">
+                  <div class="header-item flex gap-2">
+                    <input type="text" placeholder="Header name" class="flex-1 px-2 py-1 border rounded text-sm">
+                    <input type="text" placeholder="Header value" class="flex-1 px-2 py-1 border rounded text-sm">
+                    <button class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600">×</button>
+                  </div>
+                </div>
+                <button id="add-header" class="mt-2 px-3 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600">
+                  + Add Header
+                </button>
+              </div>
+              
+              <div id="try-body" class="body-section" style="display: none;">
+                <h4 class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Request Body</h4>
+                <textarea 
+                  id="try-body-content" 
+                  class="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm font-mono
+                         bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  placeholder="Enter request body (JSON)"
+                ></textarea>
+              </div>
+              
+              <div class="action-buttons flex gap-2">
+                <button 
+                  id="send-request" 
+                  class="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium"
+                >
+                  Send Request
+                </button>
+                <button 
+                  id="clear-try-panel" 
+                  class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            
+            <div id="try-response" class="response-section" style="display: none;">
+              <div class="response-header p-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Response</h4>
+                <div id="response-status" class="mt-1"></div>
+              </div>
+              <div class="response-content p-4">
+                <div id="response-headers" class="mb-4" style="display: none;">
+                  <h5 class="text-xs font-semibold mb-2 text-gray-600 dark:text-gray-400">Response Headers</h5>
+                  <pre id="response-headers-content" class="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-x-auto"></pre>
+                </div>
+                <div id="response-body">
+                  <h5 class="text-xs font-semibold mb-2 text-gray-600 dark:text-gray-400">Response Body</h5>
+                  <pre id="response-body-content" class="text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded overflow-x-auto"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="try-panel-placeholder" class="try-placeholder p-8 text-center text-gray-500 dark:text-gray-400">
+            <div class="text-4xl mb-4">🎯</div>
+            <p class="text-sm">Click on any endpoint to test it here</p>
+            <p class="text-xs mt-2">Configure environment variables above for authentication</p>
           </div>
         </div>
       </div>
@@ -504,14 +585,18 @@ export class SidebarService {
    * Generate sidebar JavaScript
    */
   generateSidebarJS(): string {
+    const environmentJS = this.environmentService.generateEnvironmentJS();
+    
     return `
       <script>
+        ${environmentJS}
+        
         (function() {
           // Sidebar functionality
           const sidebar = document.getElementById('zedoc-sidebar');
           const sidebarToggle = document.getElementById('sidebar-toggle');
           const mainContent = document.querySelector('.main-content');
-          const tryPanel = document.getElementById('zedoc-try-panel');
+          const tryPanel = document.getElementById('try-panel');
           const tryPanelToggle = document.getElementById('try-panel-toggle');
           
           // Sidebar toggle
@@ -528,7 +613,21 @@ export class SidebarService {
           if (tryPanelToggle) {
             tryPanelToggle.addEventListener('click', function() {
               tryPanel.classList.toggle('collapsed');
+              const icon = tryPanelToggle.querySelector('.try-panel-toggle-icon');
+              if (icon) {
+                icon.textContent = tryPanel.classList.contains('collapsed') ? '▶' : '◀';
+              }
             });
+          }
+          
+          // Initialize try panel state
+          if (tryPanel) {
+            const defaultExpanded = tryPanel.dataset.defaultExpanded === 'true';
+            if (!defaultExpanded) {
+              tryPanel.classList.add('collapsed');
+              const icon = tryPanelToggle?.querySelector('.try-panel-toggle-icon');
+              if (icon) icon.textContent = '▶';
+            }
           }
           
           // Search functionality
@@ -567,11 +666,265 @@ export class SidebarService {
                 .filter(f => f.checked)
                 .map(f => f.value);
               
-              const groups = document.querySelectorAll('.endpoint-group');
-              groups.forEach(group => {
-                const tag = group.dataset.tag;
-                group.style.display = selectedTags.includes(tag) ? 'block' : 'none';
+              if (selectedTags.length === 0) {
+                // Show all groups if no tags selected
+                const groups = document.querySelectorAll('.endpoint-group');
+                groups.forEach(group => {
+                  group.style.display = 'block';
+                });
+              } else {
+                // Show only selected tags
+                const groups = document.querySelectorAll('.endpoint-group');
+                groups.forEach(group => {
+                  const tag = group.dataset.tag;
+                  group.style.display = selectedTags.includes(tag) ? 'block' : 'none';
+                });
+              }
+            });
+          });
+          
+          // Try panel endpoint functionality
+          function loadEndpointInTryPanel(endpoint) {
+            const tryPanelEndpoint = document.getElementById('try-panel-endpoint');
+            const tryPanelPlaceholder = document.getElementById('try-panel-placeholder');
+            
+            if (!tryPanelEndpoint || !tryPanelPlaceholder) return;
+            
+            // Show endpoint section, hide placeholder
+            tryPanelEndpoint.style.display = 'block';
+            tryPanelPlaceholder.style.display = 'none';
+            
+            // Populate endpoint details
+            document.getElementById('try-method').textContent = endpoint.method;
+            document.getElementById('try-method').className = 'method-badge method-' + endpoint.method.toLowerCase();
+            document.getElementById('try-path').textContent = endpoint.path;
+            document.getElementById('try-summary').textContent = endpoint.summary || '';
+            
+            // Show/hide sections based on endpoint
+            const parametersSection = document.getElementById('try-parameters');
+            const bodySection = document.getElementById('try-body');
+            
+            if (endpoint.parameters && endpoint.parameters.length > 0) {
+              parametersSection.style.display = 'block';
+              populateParameters(endpoint.parameters);
+            } else {
+              parametersSection.style.display = 'none';
+            }
+            
+            if (['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {
+              bodySection.style.display = 'block';
+            } else {
+              bodySection.style.display = 'none';
+            }
+            
+            // Clear previous response
+            document.getElementById('try-response').style.display = 'none';
+            
+            // Expand try panel if collapsed
+            if (tryPanel && tryPanel.classList.contains('collapsed')) {
+              tryPanel.classList.remove('collapsed');
+              const icon = tryPanelToggle?.querySelector('.try-panel-toggle-icon');
+              if (icon) icon.textContent = '◀';
+            }
+          }
+          
+          function populateParameters(parameters) {
+            const parametersList = document.getElementById('try-parameters-list');
+            if (!parametersList) return;
+            
+            parametersList.innerHTML = parameters.map(param => \`
+              <div class="parameter-item">
+                <label class="block text-sm font-medium mb-1">
+                  \${param.name} 
+                  <span class="text-xs text-gray-500">(\${param.in})</span>
+                  \${param.required ? '<span class="text-red-500">*</span>' : ''}
+                </label>
+                <input 
+                  type="text" 
+                  class="w-full px-2 py-1 border rounded text-sm"
+                  placeholder="Enter \${param.name}"
+                  data-param-name="\${param.name}"
+                  data-param-in="\${param.in}"
+                  data-param-required="\${param.required}"
+                />
+                \${param.description ? \`<p class="text-xs text-gray-500 mt-1">\${param.description}</p>\` : ''}
+              </div>
+            \`).join('');
+          }
+          
+          // Send request functionality
+          const sendRequestBtn = document.getElementById('send-request');
+          if (sendRequestBtn) {
+            sendRequestBtn.addEventListener('click', async function() {
+              const method = document.getElementById('try-method')?.textContent;
+              const path = document.getElementById('try-path')?.textContent;
+              
+              if (!method || !path) return;
+              
+              // Collect headers
+              const headers = { 'Content-Type': 'application/json' };
+              
+              // Add environment headers
+              if (window.zedocEnvironment && window.zedocEnvironment.headers) {
+                Object.assign(headers, window.zedocEnvironment.headers);
+              }
+              
+              // Add custom headers
+              const headerInputs = document.querySelectorAll('#try-headers-list .header-item');
+              headerInputs.forEach(item => {
+                const nameInput = item.querySelector('input[placeholder="Header name"]');
+                const valueInput = item.querySelector('input[placeholder="Header value"]');
+                if (nameInput?.value && valueInput?.value) {
+                  headers[nameInput.value] = valueInput.value;
+                }
               });
+              
+              // Collect parameters
+              const params = new URLSearchParams();
+              const paramInputs = document.querySelectorAll('[data-param-name]');
+              paramInputs.forEach(input => {
+                if (input.value && input.dataset.paramIn === 'query') {
+                  params.append(input.dataset.paramName, input.value);
+                }
+              });
+              
+              // Build URL
+              let url = path;
+              if (params.toString()) {
+                url += '?' + params.toString();
+              }
+              
+              // Collect body
+              let body = null;
+              if (['POST', 'PUT', 'PATCH'].includes(method)) {
+                const bodyContent = document.getElementById('try-body-content')?.value;
+                if (bodyContent) {
+                  try {
+                    body = JSON.stringify(JSON.parse(bodyContent));
+                  } catch (e) {
+                    body = bodyContent;
+                  }
+                }
+              }
+              
+              // Show loading state
+              sendRequestBtn.textContent = 'Sending...';
+              sendRequestBtn.disabled = true;
+              
+              try {
+                const response = await fetch(url, {
+                  method,
+                  headers,
+                  body
+                });
+                
+                // Show response
+                displayResponse(response);
+                
+              } catch (error) {
+                displayError(error);
+              } finally {
+                sendRequestBtn.textContent = 'Send Request';
+                sendRequestBtn.disabled = false;
+              }
+            });
+          }
+          
+          async function displayResponse(response) {
+            const responseSection = document.getElementById('try-response');
+            const statusEl = document.getElementById('response-status');
+            const headersEl = document.getElementById('response-headers-content');
+            const bodyEl = document.getElementById('response-body-content');
+            
+            if (!responseSection) return;
+            
+            responseSection.style.display = 'block';
+            
+            // Status
+            const statusClass = response.ok ? 'text-green-600' : 'text-red-600';
+            statusEl.innerHTML = \`<span class="\${statusClass} font-mono">\${response.status} \${response.statusText}</span>\`;
+            
+            // Headers
+            const responseHeaders = {};
+            response.headers.forEach((value, key) => {
+              responseHeaders[key] = value;
+            });
+            headersEl.textContent = JSON.stringify(responseHeaders, null, 2);
+            document.getElementById('response-headers').style.display = 'block';
+            
+            // Body
+            try {
+              const text = await response.text();
+              let formattedBody = text;
+              
+              try {
+                const json = JSON.parse(text);
+                formattedBody = JSON.stringify(json, null, 2);
+              } catch (e) {
+                // Not JSON, use as is
+              }
+              
+              bodyEl.textContent = formattedBody;
+            } catch (error) {
+              bodyEl.textContent = 'Error reading response body: ' + error.message;
+            }
+          }
+          
+          function displayError(error) {
+            const responseSection = document.getElementById('try-response');
+            const statusEl = document.getElementById('response-status');
+            const bodyEl = document.getElementById('response-body-content');
+            
+            if (!responseSection) return;
+            
+            responseSection.style.display = 'block';
+            statusEl.innerHTML = '<span class="text-red-600 font-mono">Error</span>';
+            bodyEl.textContent = error.message;
+            document.getElementById('response-headers').style.display = 'none';
+          }
+          
+          // Clear try panel
+          const clearBtn = document.getElementById('clear-try-panel');
+          if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+              // Clear all inputs
+              document.querySelectorAll('#try-panel input, #try-panel textarea').forEach(input => {
+                if (!input.dataset.variableName) { // Don't clear environment variables
+                  input.value = '';
+                }
+              });
+              
+              // Hide response
+              document.getElementById('try-response').style.display = 'none';
+            });
+          }
+          
+          // Add header functionality
+          const addHeaderBtn = document.getElementById('add-header');
+          if (addHeaderBtn) {
+            addHeaderBtn.addEventListener('click', function() {
+              const headersList = document.getElementById('try-headers-list');
+              const newHeader = document.createElement('div');
+              newHeader.className = 'header-item flex gap-2';
+              newHeader.innerHTML = \`
+                <input type="text" placeholder="Header name" class="flex-1 px-2 py-1 border rounded text-sm">
+                <input type="text" placeholder="Header value" class="flex-1 px-2 py-1 border rounded text-sm">
+                <button class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600">×</button>
+              \`;
+              
+              // Add remove functionality
+              newHeader.querySelector('button').addEventListener('click', function() {
+                newHeader.remove();
+              });
+              
+              headersList.appendChild(newHeader);
+            });
+          }
+          
+          // Remove header functionality for existing headers
+          document.querySelectorAll('#try-headers-list .header-item button').forEach(btn => {
+            btn.addEventListener('click', function() {
+              btn.closest('.header-item').remove();
             });
           });
           
@@ -594,6 +947,15 @@ export class SidebarService {
                 setTimeout(() => {
                   targetElement.classList.remove('highlighted');
                 }, 2000);
+                
+                // Load endpoint in try panel
+                const endpoint = {
+                  method: this.dataset.method,
+                  path: this.dataset.path,
+                  summary: this.querySelector('.endpoint-summary')?.textContent || '',
+                  parameters: [] // TODO: Extract from endpoint data
+                };
+                loadEndpointInTryPanel(endpoint);
               }
             });
           });

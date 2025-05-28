@@ -10,6 +10,7 @@ export interface DocumentationConfig {
   }>;
   theme?: ThemeConfig;
   sidebar?: SidebarConfig;
+  environment?: EnvironmentConfig;
 }
 
 export interface ThemeConfig {
@@ -86,6 +87,7 @@ export interface TemplateData {
   endpoints: EndpointInfo[];
   theme?: ThemeConfig;
   sidebar?: SidebarConfig;
+  environment?: EnvironmentConfig;
   tags?: string[];
 }
 
@@ -111,4 +113,24 @@ export interface ResponseInfo {
   statusCode: number;
   description: string;
   schema?: any;
+}
+
+export interface EnvironmentConfig {
+  variables?: EnvironmentVariable[];
+  defaultTokens?: {
+    accessToken?: string;
+    refreshToken?: string;
+    apiKey?: string;
+    bearerToken?: string;
+  };
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string>;
+}
+
+export interface EnvironmentVariable {
+  name: string;
+  value: string;
+  description?: string;
+  type?: 'token' | 'header' | 'query' | 'body' | 'custom';
+  sensitive?: boolean;
 } 
