@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true
+  },
+  "projects": {
+    "zedoc": {
+      "type": "library",
+      "root": ".",
+      "entryFile": "index",
+      "sourceRoot": "src",
+      "compilerOptions": {
+        "tsConfigPath": "tsconfig.lib.json"
+      }
+    }
+  }
+} 
