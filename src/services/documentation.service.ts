@@ -41,6 +41,13 @@ export class DocumentationService {
   private setupHandlebars(): void {
     // Register Handlebars helpers
     hbs.registerHelper('eq', (a: any, b: any) => a === b);
+    hbs.registerHelper('unless', (conditional: any, options: any) => {
+      if (!conditional) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    });
     hbs.registerHelper('uppercase', (str: string) => str?.toUpperCase());
     hbs.registerHelper('lowercase', (str: string) => str?.toLowerCase());
     hbs.registerHelper('json', (obj: any) => JSON.stringify(obj, null, 2));

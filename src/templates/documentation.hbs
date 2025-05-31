@@ -17,7 +17,7 @@
         
         /* Navigation improvements */
         .nav-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
         }
         
         .nav-title {
@@ -27,8 +27,60 @@
             letter-spacing: 0.05em;
             color: var(--light-text-secondary);
             margin-bottom: 0.75rem;
-            padding-bottom: 0.5rem;
+            padding: 0.75rem;
             border-bottom: 1px solid var(--light-border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .nav-title:hover {
+            background-color: var(--light-hover);
+            color: var(--light-accent);
+        }
+        
+        .nav-title.active {
+            background-color: var(--light-accent);
+            color: white;
+            border-color: var(--light-accent);
+        }
+        
+        .nav-title.collapsible {
+            margin-bottom: 0;
+        }
+        
+        .collapse-icon {
+            font-size: 0.75rem;
+            transition: transform 0.2s ease;
+            opacity: 0.7;
+        }
+        
+        .nav-title:not(.collapsed) .collapse-icon {
+            transform: rotate(90deg);
+        }
+        
+        .nav-modules {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.2s ease;
+            padding-left: 0.75rem;
+            border-left: 2px solid var(--light-border);
+            margin-left: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .nav-modules.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+        
+        .nav-modules:not(.collapsed) {
+            max-height: 500px;
+            opacity: 1;
         }
         
         .nav-item {
@@ -73,6 +125,21 @@
             border-bottom-color: var(--dark-border);
         }
         
+        body.dark .nav-title:hover {
+            background-color: var(--dark-hover);
+            color: var(--dark-accent);
+        }
+        
+        body.dark .nav-title.active {
+            background-color: var(--dark-accent);
+            color: white;
+            border-color: var(--dark-accent);
+        }
+        
+        body.dark .nav-modules {
+            border-left-color: var(--dark-border);
+        }
+        
         body.dark .nav-item {
             color: var(--dark-text);
         }
@@ -96,6 +163,41 @@
         [id] {
             scroll-margin-top: 2rem;
         }
+        
+        /* Header controls */
+        .header-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .expand-all-btn {
+            background: none;
+            border: 1px solid var(--light-border);
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--light-text-secondary);
+            transition: all 0.2s ease;
+        }
+        
+        .expand-all-btn:hover {
+            background-color: var(--light-hover);
+            border-color: var(--light-accent);
+            color: var(--light-accent);
+        }
+        
+        body.dark .expand-all-btn {
+            border-color: var(--dark-border);
+            color: var(--dark-text-secondary);
+        }
+        
+        body.dark .expand-all-btn:hover {
+            background-color: var(--dark-hover);
+            border-color: var(--dark-accent);
+            color: var(--dark-accent);
+        }
     </style>
 </head>
 <body class="light">
@@ -113,7 +215,10 @@
                             {{title}}
                         {{/if}}
                     </div>
-                    <button class="theme-toggle">🌙</button>
+                    <div class="header-controls">
+                        <button class="expand-all-btn" title="Expand all sections">⊞</button>
+                        <button class="theme-toggle">🌙</button>
+                    </div>
                 </div>
                 <div class="subtitle">API Documentation</div>
                 {{#if version}}
@@ -138,20 +243,30 @@
             <!-- Navigation Sections -->
             {{#if sections}}
                 {{#each sections}}
-                <div class="nav-section">
-                    <div class="nav-title">{{name}}</div>
-                    {{#each modules}}
-                    <a href="#{{moduleId ../id id}}" class="nav-item">{{name}}</a>
-                    {{/each}}
+                <div class="nav-section" data-section="{{id}}">
+                    <div class="nav-title collapsible" data-target="#{{sectionId id}}" role="button" tabindex="0" aria-expanded="false" aria-controls="modules-{{id}}">
+                        <span class="section-name">{{name}}</span>
+                        <span class="collapse-icon" aria-hidden="true">▶</span>
+                    </div>
+                    <div class="nav-modules collapsed" id="modules-{{id}}" role="group" aria-labelledby="section-{{id}}">
+                        {{#each modules}}
+                        <a href="#{{moduleId ../id id}}" class="nav-item">
+                            <span class="module-name">{{name}}</span>
+                            <span class="endpoint-count">{{endpoints.length}} endpoint{{#unless (eq endpoints.length 1)}}s{{/unless}}</span>
+                        </a>
+                        {{/each}}
+                    </div>
                 </div>
                 {{/each}}
             {{else}}
                 <!-- Fallback for non-structured mode -->
                 <div class="nav-section">
                     <div class="nav-title">Endpoints</div>
-                    {{#each endpoints}}
-                    <a href="#{{endpointId this}}" class="nav-item">{{method}} {{path}}</a>
-                    {{/each}}
+                    <div class="nav-modules">
+                        {{#each endpoints}}
+                        <a href="#{{endpointId this}}" class="nav-item">{{method}} {{path}}</a>
+                        {{/each}}
+                    </div>
                 </div>
             {{/if}}
         </nav>
@@ -548,6 +663,213 @@
             updateThemeToggleIcon();
             
             console.log(`🎨 Theme toggled to: ${newTheme}`);
+        }
+        
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCollapsibleNavigation();
+            initializeNavigationScrollSpy();
+        });
+        
+        function initializeCollapsibleNavigation() {
+            // Handle expand/collapse all button
+            const expandAllBtn = document.querySelector('.expand-all-btn');
+            let allExpanded = false;
+            
+            if (expandAllBtn) {
+                expandAllBtn.addEventListener('click', function() {
+                    const sections = document.querySelectorAll('.nav-title.collapsible');
+                    const modules = document.querySelectorAll('.nav-modules');
+                    
+                    allExpanded = !allExpanded;
+                    
+                    sections.forEach((title, index) => {
+                        const moduleElement = modules[index];
+                        if (allExpanded) {
+                            moduleElement.classList.remove('collapsed');
+                            title.classList.remove('collapsed');
+                            title.setAttribute('aria-expanded', 'true');
+                        } else {
+                            moduleElement.classList.add('collapsed');
+                            title.classList.add('collapsed');
+                            title.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                    
+                    // Update button text and title
+                    this.innerHTML = allExpanded ? '⊟' : '⊞';
+                    this.title = allExpanded ? 'Collapse all sections' : 'Expand all sections';
+                    
+                    console.log(`📁 ${allExpanded ? 'Expanded' : 'Collapsed'} all sections`);
+                });
+            }
+            
+            // Handle section title clicks for collapsing/expanding and scrolling
+            document.querySelectorAll('.nav-title.collapsible').forEach(title => {
+                title.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const modules = this.nextElementSibling;
+                    const isCollapsed = modules.classList.contains('collapsed');
+                    const targetId = this.getAttribute('data-target');
+                    
+                    // Toggle collapse state
+                    if (isCollapsed) {
+                        modules.classList.remove('collapsed');
+                        this.classList.remove('collapsed');
+                        this.setAttribute('aria-expanded', 'true');
+                    } else {
+                        modules.classList.add('collapsed');
+                        this.classList.add('collapsed');
+                        this.setAttribute('aria-expanded', 'false');
+                    }
+                    
+                    // Also scroll to the section
+                    if (targetId) {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            setTimeout(() => {
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }, isCollapsed ? 300 : 0); // Wait for expansion animation
+                        }
+                    }
+                    
+                    console.log(`📂 Section ${isCollapsed ? 'expanded' : 'collapsed'}: ${this.querySelector('.section-name').textContent}`);
+                });
+                
+                // Start with sections collapsed
+                const modules = title.nextElementSibling;
+                modules.classList.add('collapsed');
+                title.classList.add('collapsed');
+            });
+            
+            // Handle module link clicks
+            document.querySelectorAll('.nav-item[href^="#"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // Remove active class from all nav items
+                        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                        
+                        // Add active class to clicked item
+                        this.classList.add('active');
+                        
+                        // Scroll to target
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        console.log(`🎯 Navigating to module: ${targetId}`);
+                    }
+                });
+            });
+        }
+        
+        function initializeNavigationScrollSpy() {
+            const sectionTitles = document.querySelectorAll('.nav-title[data-target]');
+            const navItems = document.querySelectorAll('.nav-item[href^="#"]');
+            
+            function updateActiveNavigation() {
+                const scrollY = window.scrollY;
+                
+                // Check sections
+                sectionTitles.forEach(title => {
+                    const targetId = title.getAttribute('data-target').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        const rect = targetElement.getBoundingClientRect();
+                        const elementTop = scrollY + rect.top;
+                        const elementBottom = elementTop + rect.height;
+                        
+                        if (scrollY >= elementTop - 100 && scrollY < elementBottom + 100) {
+                            // Remove active from all section titles
+                            sectionTitles.forEach(t => t.classList.remove('active'));
+                            title.classList.add('active');
+                        }
+                    }
+                });
+                
+                // Check modules
+                navItems.forEach(item => {
+                    const targetId = item.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        const rect = targetElement.getBoundingClientRect();
+                        const elementTop = scrollY + rect.top;
+                        const elementBottom = elementTop + rect.height;
+                        
+                        if (scrollY >= elementTop - 100 && scrollY < elementBottom - 50) {
+                            // Remove active from all nav items
+                            navItems.forEach(i => i.classList.remove('active'));
+                            item.classList.add('active');
+                        }
+                    }
+                });
+            }
+            
+            // Throttled scroll listener
+            let ticking = false;
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    requestAnimationFrame(updateActiveNavigation);
+                    ticking = true;
+                }
+            });
+            
+            // Initialize on load
+            updateActiveNavigation();
+        }
+        
+        // Keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            // Only handle when focus is on navigation elements
+            if (!e.target.closest('.sidebar')) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    navigateWithArrowKeys(e.key === 'ArrowUp' ? -1 : 1);
+                    break;
+                case 'Enter':
+                case ' ':
+                    if (e.target.classList.contains('nav-title')) {
+                        e.preventDefault();
+                        e.target.click();
+                    }
+                    break;
+                case 'Escape':
+                    // Collapse all sections
+                    document.querySelectorAll('.nav-modules').forEach(module => {
+                        module.classList.add('collapsed');
+                    });
+                    document.querySelectorAll('.nav-title.collapsible').forEach(title => {
+                        title.classList.add('collapsed');
+                    });
+                    break;
+            }
+        });
+        
+        function navigateWithArrowKeys(direction) {
+            const focusableElements = document.querySelectorAll('.nav-title, .nav-item');
+            const currentIndex = Array.from(focusableElements).findIndex(el => el === document.activeElement);
+            
+            if (currentIndex !== -1) {
+                const nextIndex = Math.max(0, Math.min(focusableElements.length - 1, currentIndex + direction));
+                focusableElements[nextIndex].focus();
+            } else if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
         }
     </script>
 </body>
