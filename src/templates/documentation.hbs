@@ -84,9 +84,7 @@
         }
         
         .nav-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: block;
             padding: 0.5rem 0.75rem;
             margin-bottom: 0.25rem;
             color: var(--light-text);
@@ -252,7 +250,6 @@
                         {{#each modules}}
                         <a href="#{{moduleId ../id id}}" class="nav-item">
                             <span class="module-name">{{name}}</span>
-                            <span class="endpoint-count">{{endpoints.length}} endpoint{{#unless (eq endpoints.length 1)}}s{{/unless}}</span>
                         </a>
                         {{/each}}
                     </div>
