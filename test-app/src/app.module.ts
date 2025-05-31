@@ -12,18 +12,18 @@ import { UsersController } from './users.controller';
       version: '3.0.0',
       theme: {
         preset: 'default',
-        mode: 'light',
-        colors: {
-          primary: '#ff6c37',
-          secondary: '#4a5568',
-          success: '#48bb78',
-          warning: '#f59e0b',
-          danger: '#ef4444',
-        },
-        fonts: {
-          size: 'md',
-          family: 'inter'
-        }
+        mode: 'dark',
+        // colors: {
+        //   primary: '#ff6c37',
+        //   secondary: '#4a5568',
+        //   success: '#48bb78',
+        //   warning: '#f59e0b',
+        //   danger: '#ef4444',
+        // },
+        // fonts: {
+        //   size: 'md',
+        //   family: 'inter'
+        // }
       },
       sidebar: {
         position: 'left',
