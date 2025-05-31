@@ -23,24 +23,24 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Option 1: Use local Swagger document (current approach)
-  ZedocModule.setSwaggerDocument(app, document);
+  // ZedocModule.setSwaggerDocument(app, document);
   
   // Option 2: Load from external URL (new feature demonstration)
   // Uncomment the following lines to test with the complex external API
-  // try {
-  //   console.log('🌐 Loading complex Swagger document from external API...');
-  //   await ZedocModule.setSwaggerJson(app, 'https://api.staging.thecyrcle.com/v1/json', {
-  //     timeout: 15000, // 15 seconds timeout
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'User-Agent': '@kodesonik/zedoc-test'
-  //     }
-  //   });
-  //   console.log('✅ External Swagger document loaded successfully!');
-  // } catch (error) {
-  //   console.warn('⚠️  Failed to load external Swagger document, using local document:', error.message);
-  //   ZedocModule.setSwaggerDocument(app, document);
-  // }
+  try {
+    console.log('🌐 Loading complex Swagger document from external API...');
+    await ZedocModule.setSwaggerJson(app, 'https://api.staging.thecyrcle.com/v1/json', {
+      timeout: 15000, // 15 seconds timeout
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': '@kodesonik/zedoc-test'
+      }
+    });
+    console.log('✅ External Swagger document loaded successfully!');
+  } catch (error) {
+    console.warn('⚠️  Failed to load external Swagger document, using local document:', error.message);
+    ZedocModule.setSwaggerDocument(app, document);
+  }
 
   // Option 3: Load from local file (alternative approach)
   // await ZedocModule.setSwaggerJson(app, './swagger.json');
