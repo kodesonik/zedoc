@@ -21,7 +21,7 @@ export class SidebarService {
       searchbar: sidebarConfig?.searchbar !== false, // default true
       rolesFilter: sidebarConfig?.rolesFilter !== false, // default true
       collapsible: sidebarConfig?.collapsible !== false, // default true
-      width: sidebarConfig?.width || '280px',
+      width: sidebarConfig?.width || '250px',
       try: this.getResolvedTryConfig(sidebarConfig?.try, sidebarConfig?.position),
     };
   }
@@ -616,15 +616,11 @@ export class SidebarService {
   }
 
   generateSidebarJS(): string {
-    const environmentJS = this.environmentService.generateEnvironmentJS();
+    // const environmentJS = this.environmentService.generateEnvironmentJS();
     const enhancedJS = this.loadEnhancedJS();
     
     return `
       ${enhancedJS}
-      
-      // <script>
-        ${environmentJS}
-      // </script>
     `;
   }
 
