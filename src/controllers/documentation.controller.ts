@@ -1,8 +1,8 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, Query } from '@nestjs/common';
 import { Response } from 'express';
 import { DocumentationService } from '../services/documentation.service';
 import { SwaggerIntegrationService } from '../services/swagger-integration.service';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Documentation')
 @Controller('docs')
@@ -14,7 +14,13 @@ export class DocumentationController {
 
   @Get()
   @ApiOperation({ summary: 'Get unified API documentation' })
-  async getDocumentation(@Res() res: Response): Promise<void> {
+  @ApiQuery({ name: 'theme', required: false, enum: ['light', 'dark'], description: 'Theme mode for the documentation' })
+  @ApiQuery({ name: 'preset', required: false, enum: ['default', 'postman', 'insomnia', 'swagger', 'custom'], description: 'Theme preset for the documentation' })
+  async getDocumentation(
+    @Res() res: Response,
+    @Query('theme') theme?: 'light' | 'dark',
+    @Query('preset') preset?: 'default' | 'postman' | 'insomnia' | 'swagger' | 'custom'
+  ): Promise<void> {
     try {
       // Get Swagger document
       let swaggerDoc =
@@ -25,10 +31,25 @@ export class DocumentationController {
       const sections =
         this.swaggerIntegrationService.convertSwaggerToSections(swaggerDoc);
 
-      // Generate documentation
+      // Override theme configuration if query parameters are provided
+      const currentConfig = this.documentationService.getConfig();
+      const themeOverride = {
+        ...currentConfig.theme,
+        ...(theme && { mode: theme }),
+        ...(preset && { preset: preset }),
+      };
+
+      console.log(`🎨 Theme configuration:`, {
+        mode: themeOverride.mode || 'light',
+        preset: themeOverride.preset || 'default',
+        fromQuery: { theme, preset }
+      });
+
+      // Generate documentation with theme override
       const html = this.documentationService.generateDocumentation(
         swaggerDoc,
         sections,
+        { theme: themeOverride }
       );
 
       res.setHeader('Content-Type', 'text/html');

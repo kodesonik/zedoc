@@ -399,8 +399,82 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script>
+        // Inline JavaScript from services
         {{{sidebarJS}}}
         {{{environmentJS}}}
+    </script>
+    <!-- Import the main docs.js file with all interactive functionality -->
+    <script>
+        // Load docs.js from assets
+        const script = document.createElement('script');
+        script.src = './assets/docs.js';
+        script.onload = function() {
+            console.log('📄 Documentation interactive features loaded');
+        };
+        script.onerror = function() {
+            console.warn('⚠️ Could not load docs.js - some interactive features may not work');
+        };
+        document.head.appendChild(script);
+        
+        // Initialize theme from URL parameter or localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for theme parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const themeParam = urlParams.get('theme');
+            
+            if (themeParam && (themeParam === 'light' || themeParam === 'dark')) {
+                // Apply theme from URL parameter
+                document.body.className = themeParam;
+                
+                // Save to localStorage
+                localStorage.setItem('api-docs-theme', themeParam);
+                console.log(`🎨 Theme set from URL parameter: ${themeParam}`);
+            } else {
+                // Use server-side theme or default from localStorage
+                const savedTheme = localStorage.getItem('api-docs-theme');
+                const defaultTheme = '{{theme.mode}}' || 'light';
+                const currentTheme = savedTheme || defaultTheme;
+                
+                document.body.className = currentTheme;
+                console.log(`🎨 Theme initialized: ${currentTheme}`);
+            }
+            
+            // Update theme toggle icon
+            updateThemeToggleIcon();
+        });
+        
+        // Function to update theme toggle icon
+        function updateThemeToggleIcon() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (themeToggle) {
+                const currentTheme = document.body.className;
+                const icon = currentTheme === 'light' ? '🌙' : '☀️';
+                const title = currentTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+                
+                themeToggle.innerHTML = icon;
+                themeToggle.title = title;
+            }
+        }
+        
+        // Manual theme toggle function (fallback if docs.js doesn't load)
+        function toggleTheme() {
+            const currentTheme = document.body.className;
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.body.className = newTheme;
+            localStorage.setItem('api-docs-theme', newTheme);
+            updateThemeToggleIcon();
+            
+            console.log(`🎨 Theme toggled to: ${newTheme}`);
+        }
+        
+        // Add click listener to theme toggle button (fallback)
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
+        });
     </script>
 </body>
 </html> 

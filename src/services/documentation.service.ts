@@ -185,20 +185,30 @@ export class DocumentationService {
   /**
    * Generate documentation (unified method supporting both modes)
    */
-  generateDocumentation(doc:any, sections: SectionConfig[]): string {    
+  generateDocumentation(doc:any, sections: SectionConfig[], configOverride?: Partial<DocumentationConfig>): string {    
     // Swagger mode
     const tags = this.extractTagsFromSections(sections || []);
     
+    // Merge base config with override
+    const effectiveConfig = {
+      ...this.config,
+      ...configOverride,
+      theme: {
+        ...this.config.theme,
+        ...configOverride?.theme,
+      }
+    };
+    
     const templateData: TemplateData = {
-      title: doc.info?.title || this.config.title || 'API Documentation',
-      description: doc.info?.description || this.config.description,
-      version: doc.info?.version || this.config.version || '1.0.0',
+      title: doc.info?.title || effectiveConfig.title || 'API Documentation',
+      description: doc.info?.description || effectiveConfig.description,
+      version: doc.info?.version || effectiveConfig.version || '1.0.0',
       sections,
       tags,
-      theme: this.config.theme,
-      sidebar: this.config.sidebar,
-      environment: this.config.environment,
-      branding: this.config.branding,
+      theme: effectiveConfig.theme,
+      sidebar: effectiveConfig.sidebar,
+      environment: effectiveConfig.environment,
+      branding: effectiveConfig.branding,
     };
 
     const templatePath = path.join(__dirname, '../templates/documentation.hbs');
