@@ -90,7 +90,7 @@ export interface TryPanelConfig {
 
 // Theme
 export interface ThemeConfig {
-  preset?: 'basic' | 'postman' | 'insomnia' | 'swagger' | 'custom';
+  preset?: 'default' | 'postman' | 'insomnia' | 'swagger' | 'custom';
   mode?: 'light' | 'dark';
   colors?: ThemeColors;
   fonts?: FontConfig;

@@ -6,7 +6,7 @@ import * as path from 'path';
 @Injectable()
 export class ThemeService {
   private readonly presetThemes: Record<string, ThemeColors> = {
-    basic: {
+    default: {
       primary: '#3b82f6',
       secondary: '#64748b',
       tertiary: '#8b5cf6',
@@ -86,11 +86,11 @@ export class ThemeService {
    * Get the complete theme configuration with resolved colors
    */
   getResolvedTheme(themeConfig?: ThemeConfig): ThemeColors {
-    const preset = themeConfig?.preset || 'basic';
+    const preset = themeConfig?.preset || 'default';
     const mode = themeConfig?.mode || 'light';
     
     // Start with preset theme
-    let colors: ThemeColors = { ...this.presetThemes[preset] || this.presetThemes.basic };
+    let colors: ThemeColors = { ...this.presetThemes[preset] || this.presetThemes.default };
     
     // Apply dark mode overrides if needed
     if (mode === 'dark') {
@@ -108,19 +108,19 @@ export class ThemeService {
   /**
    * Load the enhanced CSS from the assets folder based on theme preset
    */
-  private loadEnhancedCSS(preset: string = 'basic'): string {
+  private loadEnhancedCSS(preset: string = 'default'): string {
     try {
       // Map preset to CSS file name
-      const cssFileName = preset === 'custom' ? 'basic.css' : `${preset}.css`;
+      const cssFileName = preset === 'custom' ? 'default.css' : `${preset}.css`;
       const cssPath = path.join(__dirname, '..', 'assets', cssFileName);
       return fs.readFileSync(cssPath, 'utf8');
     } catch (error) {
-      console.warn(`Could not load CSS file for preset '${preset}', falling back to basic.css`);
+      console.warn(`Could not load CSS file for preset '${preset}', falling back to default.css`);
       try {
-        const fallbackPath = path.join(__dirname, '..', 'assets', 'basic.css');
+        const fallbackPath = path.join(__dirname, '..', 'assets', 'default.css');
         return fs.readFileSync(fallbackPath, 'utf8');
       } catch (fallbackError) {
-        console.warn('Could not load basic.css, using inline fallback styles');
+        console.warn('Could not load default.css, using inline fallback styles');
         return this.getFallbackCSS();
       }
     }
@@ -130,7 +130,7 @@ export class ThemeService {
    * Generate CSS custom properties for the theme
    */
   generateThemeCSS(themeConfig?: ThemeConfig): string {
-    const preset = themeConfig?.preset || 'basic';
+    const preset = themeConfig?.preset || 'default';
     const colors = this.getResolvedTheme(themeConfig);
     
     const cssVariables = Object.entries(colors)
