@@ -634,4 +634,53 @@ export class SidebarService {
   private generateEndpointId(endpoint: Endpoint): string {
     return `${endpoint.method.toLowerCase()}-${endpoint.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
   }
+
+  /**
+   * Generate clean structured navigation HTML (sections and modules only)
+   */
+  generateCleanNavigationHTML(sections: any[], brandingConfig?: BrandingConfig): string {
+    const sidebarLogo = this.brandingService.generateSidebarLogoHTML(brandingConfig);
+    
+    let sectionsHTML = '';
+    sections.forEach(section => {
+      sectionsHTML += `
+        <div class="nav-section">
+          <div class="nav-title">${section.name}</div>
+      `;
+      
+      section.modules.forEach(module => {
+        const moduleTitle = module.name || 'Module';
+        const endpointCount = module.endpoints ? module.endpoints.length : 0;
+        
+        sectionsHTML += `
+          <a href="#module-${section.id}-${module.id}" class="nav-item">
+            <span class="module-name">${moduleTitle}</span>
+            <span class="endpoint-count">${endpointCount} endpoint${endpointCount !== 1 ? 's' : ''}</span>
+          </a>
+        `;
+      });
+      
+      sectionsHTML += `
+        </div>
+      `;
+    });
+
+    return `
+      <nav class="sidebar">
+        <div class="sidebar-header">
+          <div class="header-top">
+            <div class="logo">
+              ${brandingConfig?.logo ? this.brandingService.generateHeaderLogoHTML(brandingConfig) : 'API Documentation'}
+            </div>
+            <button class="theme-toggle">🌙</button>
+          </div>
+          <div class="subtitle">Navigate through modules</div>
+        </div>
+        
+        <div class="sidebar-content">
+          ${sectionsHTML}
+        </div>
+      </nav>
+    `;
+  }
 } 

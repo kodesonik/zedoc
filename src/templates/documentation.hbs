@@ -14,6 +14,88 @@
         {{{fontCSS}}}
         {{{sidebarCSS}}}
         {{{brandingCSS}}}
+        
+        /* Navigation improvements */
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--light-text-secondary);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--light-border);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.25rem;
+            color: var(--light-text);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--light-hover);
+            color: var(--light-text);
+            text-decoration: none;
+        }
+        
+        .nav-item.active {
+            background-color: var(--light-accent);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .nav-item .module-name {
+            font-weight: 500;
+        }
+        
+        .nav-item .endpoint-count {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            font-weight: 400;
+            margin-left: auto;
+        }
+        
+        /* Dark theme navigation */
+        body.dark .nav-title {
+            color: var(--dark-text-secondary);
+            border-bottom-color: var(--dark-border);
+        }
+        
+        body.dark .nav-item {
+            color: var(--dark-text);
+        }
+        
+        body.dark .nav-item:hover {
+            background-color: var(--dark-hover);
+            color: var(--dark-text);
+        }
+        
+        body.dark .nav-item.active {
+            background-color: var(--dark-accent);
+            color: white;
+        }
+        
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Scroll offset for fixed headers */
+        [id] {
+            scroll-margin-top: 2rem;
+        }
     </style>
 </head>
 <body class="light">
@@ -41,7 +123,7 @@
             
             <!-- Search and Filter -->
             <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search endpoints..." />
+                <input type="text" class="search-input" placeholder="Search modules and endpoints..." />
                 <div class="role-filter">
                     <label class="role-filter-label">Filter by tag:</label>
                     <div class="role-buttons">
@@ -59,7 +141,7 @@
                 <div class="nav-section">
                     <div class="nav-title">{{name}}</div>
                     {{#each modules}}
-                    <a href="#{{id}}" class="nav-item">{{name}}</a>
+                    <a href="#{{moduleId ../id id}}" class="nav-item">{{name}}</a>
                     {{/each}}
                 </div>
                 {{/each}}
@@ -129,7 +211,7 @@
                         {{/if}}
                         
                         {{#each endpoints}}
-                        <div class="endpoint-card" data-tags="{{formatTags tags}}">
+                        <div id="{{structuredEndpointId ../../id ../id this}}" class="endpoint-card" data-tags="{{formatTags tags}}">
                             <div class="endpoint-header">
                                 <span class="method-badge method-{{lowercase method}}">{{method}}</span>
                                 <span class="endpoint-path">{{path}}</span>
@@ -467,14 +549,6 @@
             
             console.log(`🎨 Theme toggled to: ${newTheme}`);
         }
-        
-        // Add click listener to theme toggle button (fallback)
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggle = document.querySelector('.theme-toggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', toggleTheme);
-            }
-        });
     </script>
 </body>
 </html> 
