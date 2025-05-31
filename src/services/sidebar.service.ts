@@ -21,7 +21,7 @@ export class SidebarService {
       searchbar: sidebarConfig?.searchbar !== false, // default true
       rolesFilter: sidebarConfig?.rolesFilter !== false, // default true
       collapsible: sidebarConfig?.collapsible !== false, // default true
-      width: sidebarConfig?.width || '320px',
+      width: sidebarConfig?.width || '280px',
       try: this.getResolvedTryConfig(sidebarConfig?.try, sidebarConfig?.position),
     };
   }
@@ -622,9 +622,9 @@ export class SidebarService {
     return `
       ${enhancedJS}
       
-      <script>
+      // <script>
         ${environmentJS}
-      </script>
+      // </script>
     `;
   }
 

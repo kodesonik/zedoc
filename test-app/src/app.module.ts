@@ -31,7 +31,7 @@ import { UsersController } from './users.controller';
         searchbar: true,
         rolesFilter: true,
         collapsible: true,
-        width: '350px',
+        width: '280px',
         try: {
           enabled: true,
           position: 'auto',

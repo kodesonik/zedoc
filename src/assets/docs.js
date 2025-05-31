@@ -546,57 +546,29 @@ class ClipboardManager {
   }
 }
 
-// Initialize all managers when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize all functionality when DOM is ready
+if (document.readyState === 'loading') {
+  // DOM hasn't finished loading yet
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  // DOM is already ready, initialize immediately
+  initializeApp();
+}
+
+function initializeApp() {
+  // Create state manager instance
   const stateManager = new StateManager();
   
-  // Add clear state button
-  const clearStateBtn = document.createElement('button');
-  clearStateBtn.className = 'clear-state-btn';
-  clearStateBtn.innerHTML = '🗑️ Clear State';
-  clearStateBtn.title = 'Clear all saved state (expanded sections, scroll position, panel data)';
-  clearStateBtn.style.cssText = `
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    padding: 0.5rem 1rem;
-    background: var(--light-orange);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 500;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-    z-index: 1000;
-  `;
-  clearStateBtn.addEventListener('click', () => {
-    if (confirm('Clear all saved state? This will reset expanded sections, scroll position, and panel data.')) {
-      stateManager.clearState();
-      location.reload();
-    }
-  });
-  clearStateBtn.addEventListener('mouseenter', () => {
-    clearStateBtn.style.opacity = '1';
-  });
-  clearStateBtn.addEventListener('mouseleave', () => {
-    clearStateBtn.style.opacity = '0.7';
-  });
-  document.body.appendChild(clearStateBtn);
+  // Initialize all managers
+  const themeManager = new ThemeManager(stateManager);
+  const navigationManager = new NavigationManager(stateManager);
+  const endpointManager = new EndpointManager(stateManager);
+  const searchManager = new SearchManager(stateManager);
+  const clipboardManager = new ClipboardManager();
+  const apiTesterManager = new ApiTesterManager(stateManager);
   
-  new ThemeManager(stateManager);
-  new NavigationManager(stateManager);
-  new EndpointManager(stateManager);
-  new SearchManager(stateManager);
-  new ClipboardManager();
-  
-  // Initialize API Testing Panel if it exists
-  const apiPanel = document.getElementById('apiPanel');
-  if (apiPanel) {
-    new ApiTesterManager(stateManager);
-  }
-});
+  console.log('📄 All documentation features initialized successfully');
+}
 
 // API Testing functionality (simplified version)
 class ApiTesterManager {
