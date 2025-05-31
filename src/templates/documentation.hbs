@@ -113,6 +113,20 @@
             <section id="getting-started" class="getting-started-section">
                 <h2 class="getting-started-title">Getting Started</h2>
                 
+                <!-- Theme Preset Selector -->
+                <div class="preset-selector">
+                    <label class="preset-selector-label" for="themePresetSelect">Choose Documentation Theme</label>
+                    <select class="preset-select" id="themePresetSelect">
+                        <option value="default">📚 Default (Solarized Book)</option>
+                        <option value="postman">🚀 Postman (Professional Orange)</option>
+                        <option value="insomnia">💜 Insomnia (Minimal Purple)</option>
+                        <option value="swagger">⚙️ Swagger (Technical Green)</option>
+                    </select>
+                    <div class="preset-description">
+                        Select a visual theme that matches your workflow. The page will reload to apply the new theme.
+                    </div>
+                </div>
+                
                 <div class="config-group">
                     <label class="config-label">Base URL</label>
                     <div class="config-input">{{baseUrl}}</div>
@@ -452,6 +466,7 @@
             // Check for theme parameter in URL
             const urlParams = new URLSearchParams(window.location.search);
             const themeParam = urlParams.get('theme');
+            const presetParam = urlParams.get('preset');
             
             if (themeParam && (themeParam === 'light' || themeParam === 'dark')) {
                 // Apply theme from URL parameter
@@ -470,9 +485,66 @@
                 console.log(`🎨 Theme initialized: ${currentTheme}`);
             }
             
+            // Initialize preset selector
+            initializePresetSelector();
+            
             // Update theme toggle icon
             updateThemeToggleIcon();
         });
+        
+        // Initialize preset selector functionality
+        function initializePresetSelector() {
+            const presetSelect = document.getElementById('themePresetSelect');
+            if (!presetSelect) return;
+            
+            // Get current preset from URL parameter or default to 'default'
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentPreset = urlParams.get('preset') || 'default';
+            
+            // Set the current preset as selected
+            presetSelect.value = currentPreset;
+            
+            // Add change event listener
+            presetSelect.addEventListener('change', function() {
+                const selectedPreset = this.value;
+                
+                // Get current URL and update/add preset parameter
+                const url = new URL(window.location);
+                url.searchParams.set('preset', selectedPreset);
+                
+                // Show loading state
+                this.disabled = true;
+                const originalText = this.options[this.selectedIndex].text;
+                this.options[this.selectedIndex].text = '🔄 Loading...';
+                
+                // Reload page with new preset
+                setTimeout(() => {
+                    window.location.href = url.toString();
+                }, 500);
+                
+                console.log(`🎨 Switching to preset: ${selectedPreset}`);
+            });
+            
+            // Update preset description based on current selection
+            updatePresetDescription(currentPreset);
+            
+            console.log(`🎨 Preset selector initialized with: ${currentPreset}`);
+        }
+        
+        // Update preset description
+        function updatePresetDescription(preset) {
+            const descriptions = {
+                'default': 'Classic book-inspired design with warm solarized colors and elegant typography. Perfect for comprehensive documentation.',
+                'postman': 'Modern professional interface with bold orange accents and glass-morphism effects. Ideal for API testing workflows.',
+                'insomnia': 'Ultra-minimal clean design with subtle purple highlights. Great for distraction-free documentation reading.',
+                'swagger': 'Technical developer-focused theme with structured green colors and monospace fonts. Perfect for API specification review.'
+            };
+            
+            const descriptionElement = document.querySelector('.preset-description');
+            if (descriptionElement && descriptions[preset]) {
+                descriptionElement.textContent = descriptions[preset];
+            }
+        }
         
         // Function to update theme toggle icon
         function updateThemeToggleIcon() {
