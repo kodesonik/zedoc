@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SidebarConfig, TryPanelConfig, EndpointInfo, EnvironmentConfig, BrandingConfig } from '../interfaces/documentation.interface';
+import { SidebarConfig, TryPanelConfig, Endpoint, EnvironmentConfig, BrandingConfig } from '../interfaces/documentation.interface';
 import { EnvironmentService } from './environment.service';
 import { BrandingService } from './branding.service';
 import * as fs from 'fs';
@@ -55,7 +55,7 @@ export class SidebarService {
   /**
    * Extract unique tags from endpoints
    */
-  extractTags(endpoints: EndpointInfo[]): string[] {
+  extractTags(endpoints: Endpoint[]): string[] {
     const tagsSet = new Set<string>();
     endpoints.forEach(endpoint => {
       endpoint.tags?.forEach(tag => tagsSet.add(tag));
@@ -66,7 +66,7 @@ export class SidebarService {
   /**
    * Generate sidebar HTML structure
    */
-  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: EndpointInfo[], tags: string[], brandingConfig?: BrandingConfig): string {
+  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: Endpoint[], tags: string[], brandingConfig?: BrandingConfig): string {
     if (sidebarConfig.position === 'none') {
       return '';
     }
@@ -140,7 +140,7 @@ export class SidebarService {
   /**
    * Generate endpoints list HTML
    */
-  private generateEndpointsList(endpoints: EndpointInfo[]): string {
+  private generateEndpointsList(endpoints: Endpoint[]): string {
     const groupedEndpoints = this.groupEndpointsByTag(endpoints);
     
     let html = '<div class="endpoints-list">';
@@ -174,8 +174,8 @@ export class SidebarService {
   /**
    * Group endpoints by their first tag
    */
-  private groupEndpointsByTag(endpoints: EndpointInfo[]): Record<string, EndpointInfo[]> {
-    const grouped: Record<string, EndpointInfo[]> = {};
+  private groupEndpointsByTag(endpoints: Endpoint[]): Record<string, Endpoint[]> {
+    const grouped: Record<string, Endpoint[]> = {};
     
     endpoints.forEach(endpoint => {
       const tag = endpoint.tags?.[0] || 'General';
@@ -631,7 +631,7 @@ export class SidebarService {
   /**
    * Generate unique endpoint ID
    */
-  private generateEndpointId(endpoint: EndpointInfo): string {
+  private generateEndpointId(endpoint: Endpoint): string {
     return `${endpoint.method.toLowerCase()}-${endpoint.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
   }
 } 
