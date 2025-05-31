@@ -47,9 +47,10 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.6;
   transition: all 0.3s ease;
+  font-weight: 300;
 }
 
 /* Light theme */
@@ -113,9 +114,10 @@ body.dark .sidebar-header {
 
 .logo {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 500;
   flex: 1;
   letter-spacing: -0.025em;
+  font-family: 'Roboto', 'Open Sans', sans-serif;
 }
 
 body.light .logo {
@@ -393,6 +395,8 @@ body.dark .nav-item.active {
   font-weight: 700;
   margin-bottom: 0.75rem;
   letter-spacing: -0.025em;
+  font-family: 'Roboto', 'Open Sans', sans-serif;
+  font-weight: 300;
 }
 
 body.light .page-title {
@@ -428,6 +432,8 @@ body.dark .page-title {
   padding-bottom: 0.5rem;
   border-bottom: 2px solid;
   position: relative;
+  font-family: 'Roboto', 'Open Sans', sans-serif;
+  font-weight: 400;
 }
 
 body.light .section-title {
@@ -453,11 +459,12 @@ body.dark .section-title {
 
 .module-title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid;
   position: relative;
+  font-family: 'Roboto', 'Open Sans', sans-serif;
 }
 
 .module-title::after {
@@ -606,7 +613,7 @@ body.dark .method-patch {
 
 .endpoint-path {
   font-size: 0.75rem;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace;
   font-weight: 500;
 }
 
@@ -707,7 +714,7 @@ body.dark .detail-title {
 .code-block {
   padding: 1rem;
   border-radius: 6px;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace;
   font-size: 0.75rem;
   overflow-x: auto;
   border: 1px solid;
@@ -730,7 +737,7 @@ body.dark .detail-title {
 }
 
 .json-code code {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace;
   font-size: 0.75rem;
   line-height: 1.5;
   background: transparent;
@@ -813,7 +820,7 @@ body.dark .error-status {
 }
 
 .param-name {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
   font-weight: 500;
 }
 
@@ -846,7 +853,7 @@ body.dark .params-table td {
 }
 
 .response-status {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
   font-weight: 600;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -1188,7 +1195,7 @@ body.dark .method-select {
   border-radius: 4px;
   background: transparent;
   font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
 }
 
 body.light .url-input {
@@ -1268,7 +1275,7 @@ body.dark .add-query-btn:hover {
   border-radius: 4px;
   background: transparent;
   font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
   resize: vertical;
 }
 
@@ -1389,7 +1396,7 @@ body.dark .export-button:hover:not(:disabled) {
   padding: 0.75rem;
   border: 1px solid;
   border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -1414,7 +1421,7 @@ body.dark .status-display {
   border-radius: 4px;
   background: transparent;
   font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
   resize: vertical;
 }
 

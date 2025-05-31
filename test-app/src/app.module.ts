@@ -11,7 +11,7 @@ import { UsersController } from './users.controller';
       description: 'Demonstrating automatic conversion of Swagger ApiTags to sections and ApiOperation summaries to modules',
       version: '3.0.0',
       theme: {
-        preset: 'postman',
+        preset: 'basic',
         mode: 'light',
         colors: {
           primary: '#ff6c37',
