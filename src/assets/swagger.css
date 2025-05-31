@@ -1414,15 +1414,15 @@ body.dark .url-input-group {
 }
 
 body.light .method-select {
+  border-color: var(--light-border);
   color: var(--light-text);
-  background-color: var(--light-hover);
-  border-right: 1px solid var(--light-border);
+  background-color: var(--light-card-bg);
 }
 
 body.dark .method-select {
+  border-color: var(--dark-border);
   color: var(--dark-text);
-  background-color: var(--dark-hover);
-  border-right: 1px solid var(--dark-border);
+  background-color: var(--dark-card-bg);
 }
 
 .url-input {
@@ -1701,5 +1701,602 @@ body.dark .response-textarea {
 
   body.dark .method-select {
     border-bottom-color: var(--dark-border);
+  }
+}
+
+/* Getting Started Section Styling - Swagger */
+.getting-started-section {
+  background: linear-gradient(135deg, rgba(133, 234, 45, 0.05), rgba(156, 238, 69, 0.03));
+  border: 2px solid;
+  border-left: 6px solid;
+  border-radius: 6px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  position: relative;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+}
+
+body.light .getting-started-section {
+  border-color: var(--light-accent);
+  border-left-color: var(--light-accent);
+  background-color: rgba(245, 245, 245, 0.9);
+  box-shadow: 0 4px 12px rgba(133, 234, 45, 0.1);
+}
+
+body.dark .getting-started-section {
+  border-color: var(--dark-accent);
+  border-left-color: var(--dark-accent);
+  background-color: rgba(26, 29, 35, 0.9);
+  box-shadow: 0 4px 12px rgba(156, 238, 69, 0.15);
+}
+
+.getting-started-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--light-accent);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.dark .getting-started-title {
+  color: var(--dark-accent);
+}
+
+.config-group {
+  margin-bottom: 1.5rem;
+  border-left: 3px solid transparent;
+  padding-left: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.config-group:hover {
+  border-left-color: var(--light-accent);
+}
+
+body.dark .config-group:hover {
+  border-left-color: var(--dark-accent);
+}
+
+.config-group:last-child {
+  margin-bottom: 0;
+}
+
+.config-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  color: var(--light-title-primary);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+}
+
+body.dark .config-label {
+  color: var(--dark-title-primary);
+}
+
+.config-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 0.875rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+body.light .config-input {
+  border-color: var(--light-border);
+  color: var(--light-text);
+  background-color: white;
+}
+
+body.light .config-input:focus {
+  outline: none;
+  border-color: var(--light-accent);
+  box-shadow: 0 0 0 3px rgba(133, 234, 45, 0.15);
+}
+
+body.dark .config-input {
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  background-color: var(--dark-card-bg);
+}
+
+body.dark .config-input:focus {
+  outline: none;
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 3px rgba(156, 238, 69, 0.2);
+}
+
+.config-input::placeholder {
+  color: rgba(117, 117, 117, 0.6);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.api-version-display {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--light-text-secondary);
+  margin-top: 0.5rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.dark .api-version-display {
+  color: var(--dark-text-secondary);
+}
+
+/* Environment Variables Section - Swagger Style */
+.environment-section {
+  background: rgba(245, 245, 245, 0.8);
+  border: 2px solid var(--light-border);
+  border-left: 4px solid var(--light-accent);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+body.dark .environment-section {
+  background: rgba(47, 47, 47, 0.8);
+  border-color: var(--dark-border);
+  border-left-color: var(--dark-accent);
+}
+
+.environment-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--light-title-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.dark .environment-title {
+  color: var(--dark-title-primary);
+}
+
+.environment-title::before {
+  content: '⚙️';
+  font-size: 1rem;
+}
+
+.env-variable {
+  display: grid;
+  grid-template-columns: 24px 1fr 200px;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.dark .env-variable {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.env-variable:last-child {
+  border-bottom: none;
+}
+
+.env-icon {
+  font-size: 1rem;
+  text-align: center;
+  color: var(--light-accent);
+}
+
+body.dark .env-icon {
+  color: var(--dark-accent);
+}
+
+.env-description {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--light-text);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+}
+
+body.dark .env-description {
+  color: var(--dark-text);
+}
+
+.env-input {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 0.75rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+body.light .env-input {
+  border-color: var(--light-border);
+  color: var(--light-text);
+  background-color: white;
+}
+
+body.light .env-input:focus {
+  outline: none;
+  border-color: var(--light-accent);
+  box-shadow: 0 0 0 2px rgba(133, 234, 45, 0.1);
+}
+
+body.dark .env-input {
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  background-color: var(--dark-card-bg);
+}
+
+body.dark .env-input:focus {
+  outline: none;
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 2px rgba(156, 238, 69, 0.15);
+}
+
+/* Default Headers Section - Swagger Style */
+.default-headers {
+  background: rgba(240, 240, 240, 0.9);
+  border: 2px solid var(--light-border);
+  border-left: 4px solid var(--light-title-secondary);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+body.dark .default-headers {
+  background: rgba(30, 30, 30, 0.9);
+  border-color: var(--dark-border);
+  border-left-color: var(--dark-title-secondary);
+}
+
+.default-headers-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--light-title-primary);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.dark .default-headers-title {
+  color: var(--dark-title-primary);
+}
+
+.header-item {
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-weight: 500;
+  color: var(--light-text);
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  border-left: 3px solid var(--light-accent);
+}
+
+body.dark .header-item {
+  color: var(--dark-text);
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: var(--dark-accent);
+}
+
+/* Action Buttons - Swagger Style */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  border-top: 2px solid var(--light-border);
+  padding-top: 1.5rem;
+}
+
+body.dark .action-buttons {
+  border-top-color: var(--dark-border);
+}
+
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  position: relative;
+  min-width: 120px;
+}
+
+.apply-button {
+  border-color: var(--light-accent);
+  color: var(--light-accent);
+}
+
+body.light .apply-button:hover {
+  background: linear-gradient(135deg, var(--light-accent), var(--light-title-secondary));
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(133, 234, 45, 0.3);
+}
+
+body.dark .apply-button {
+  border-color: var(--dark-accent);
+  color: var(--dark-accent);
+}
+
+body.dark .apply-button:hover {
+  background: linear-gradient(135deg, var(--dark-accent), var(--dark-title-secondary));
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(156, 238, 69, 0.4);
+}
+
+.clear-button {
+  border-color: var(--light-title-secondary);
+  color: var(--light-title-secondary);
+}
+
+body.light .clear-button:hover {
+  background: linear-gradient(135deg, var(--light-title-secondary), #dc2626);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(156, 238, 69, 0.3);
+}
+
+body.dark .clear-button {
+  border-color: var(--dark-title-secondary);
+  color: var(--dark-title-secondary);
+}
+
+body.dark .clear-button:hover {
+  background: linear-gradient(135deg, var(--dark-title-secondary), #dc2626);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(156, 238, 69, 0.4);
+}
+
+/* Responsive Design for Getting Started - Swagger */
+@media (max-width: 768px) {
+  .getting-started-section {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .getting-started-title {
+    font-size: 1.5rem;
+  }
+
+  .environment-section,
+  .default-headers {
+    padding: 1.25rem;
+  }
+
+  .env-variable {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .env-input {
+    flex: 1;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-button {
+    text-align: center;
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+/* Preset Selector - Swagger Theme */
+.preset-selector {
+  margin-bottom: 2rem;
+  padding: 1.75rem;
+  border: 2px solid;
+  border-left: 6px solid;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(133, 234, 45, 0.08), rgba(156, 238, 69, 0.05));
+  position: relative;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+}
+
+body.light .preset-selector {
+  border-color: var(--light-accent);
+  border-left-color: var(--light-accent);
+  background-color: rgba(248, 250, 252, 0.9);
+  box-shadow: 0 4px 12px rgba(133, 234, 45, 0.12);
+}
+
+body.dark .preset-selector {
+  border-color: var(--dark-accent);
+  border-left-color: var(--dark-accent);
+  background-color: rgba(23, 26, 32, 0.9);
+  box-shadow: 0 4px 12px rgba(156, 238, 69, 0.15);
+}
+
+.preset-selector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--light-accent), var(--light-title-secondary));
+}
+
+body.dark .preset-selector::before {
+  background: linear-gradient(90deg, var(--dark-accent), var(--dark-title-secondary));
+}
+
+.preset-selector-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--light-title-primary);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid;
+  padding-bottom: 0.5rem;
+}
+
+body.light .preset-selector-label {
+  color: var(--light-title-primary);
+  border-bottom-color: var(--light-border);
+}
+
+body.dark .preset-selector-label {
+  color: var(--dark-title-primary);
+  border-bottom-color: var(--dark-border);
+}
+
+.preset-selector-label::before {
+  content: '⚙️';
+  font-size: 1rem;
+}
+
+.preset-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 0.875rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 3rem;
+}
+
+body.light .preset-select {
+  border-color: var(--light-border);
+  color: var(--light-text);
+  background-color: white;
+}
+
+body.light .preset-select:focus {
+  outline: none;
+  border-color: var(--light-accent);
+  box-shadow: 0 0 0 3px rgba(133, 234, 45, 0.15);
+  border-left-width: 4px;
+  border-left-color: var(--light-accent);
+}
+
+body.light .preset-select:hover {
+  border-color: var(--light-accent);
+  border-left-width: 4px;
+  border-left-color: var(--light-accent);
+  box-shadow: 0 2px 8px rgba(133, 234, 45, 0.2);
+}
+
+body.dark .preset-select {
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  background-color: var(--dark-card-bg);
+}
+
+body.dark .preset-select:focus {
+  outline: none;
+  border-color: var(--dark-accent);
+  box-shadow: 0 0 0 3px rgba(156, 238, 69, 0.2);
+  border-left-width: 4px;
+  border-left-color: var(--dark-accent);
+}
+
+body.dark .preset-select:hover {
+  border-color: var(--dark-accent);
+  border-left-width: 4px;
+  border-left-color: var(--dark-accent);
+  box-shadow: 0 2px 8px rgba(156, 238, 69, 0.25);
+}
+
+.preset-select option {
+  padding: 0.875rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-weight: 500;
+}
+
+body.light .preset-select option {
+  background-color: white;
+  color: var(--light-text);
+}
+
+body.dark .preset-select option {
+  background-color: var(--dark-card-bg);
+  color: var(--dark-text);
+}
+
+.preset-description {
+  font-size: 0.8rem;
+  color: var(--light-text-secondary);
+  margin-top: 0.75rem;
+  font-weight: 400;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  line-height: 1.5;
+  opacity: 0.8;
+  border-left: 2px solid;
+  padding-left: 0.75rem;
+}
+
+body.light .preset-description {
+  color: var(--light-text-secondary);
+  border-left-color: var(--light-accent);
+}
+
+body.dark .preset-description {
+  color: var(--dark-text-secondary);
+  border-left-color: var(--dark-accent);
+}
+
+/* Responsive Preset Selector - Swagger */
+@media (max-width: 768px) {
+  .preset-selector {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .preset-selector-label {
+    font-size: 0.8rem;
+  }
+
+  .preset-select {
+    padding: 0.75rem 0.875rem;
+    padding-right: 2.5rem;
+    background-size: 0.875rem;
+  }
+
+  .preset-description {
+    font-size: 0.75rem;
   }
 } 

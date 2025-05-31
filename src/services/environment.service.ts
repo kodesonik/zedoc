@@ -138,17 +138,16 @@ export class EnvironmentService {
       const icon = this.getVariableIcon(variable.type);
       
       return `
-        <div class="env-variable-item mb-3">
-          <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-            ${icon} ${variable.name}
+        <div class="env-variable">
+          <div class="env-icon">${icon}</div>
+          <div class="env-description">
+            ${variable.name}
             ${variable.description ? `<span class="text-xs text-gray-500 ml-1">(${variable.description})</span>` : ''}
-          </label>
+          </div>
           <input 
             type="${inputType}" 
             id="env-${variable.name}"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="env-input"
             placeholder="Enter ${variable.name}"
             value="${variable.value || ''}"
             data-variable-name="${variable.name}"
@@ -159,34 +158,32 @@ export class EnvironmentService {
     }).join('');
 
     const headersHTML = Object.keys(resolved.headers).length > 0 ? `
-      <div class="mt-4">
-        <h4 class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Default Headers</h4>
+      <div class="default-headers">
+        <h4 class="default-headers-title">Default Headers</h4>
         ${Object.entries(resolved.headers).map(([key, value]) => `
-          <div class="flex items-center justify-between py-1 px-2 bg-gray-50 dark:bg-gray-700 rounded text-xs">
-            <span class="font-mono text-gray-600 dark:text-gray-400">${key}:</span>
-            <span class="font-mono text-gray-800 dark:text-gray-200">${value}</span>
+          <div class="header-item">
+            <span class="font-mono">${key}:</span>
+            <span class="font-mono">${value}</span>
           </div>
         `).join('')}
       </div>
     ` : '';
 
     return `
-      <div class="environment-config p-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
-          🌍 Environment Variables
-        </h3>
+      <div class="environment-section">
+        <h3 class="environment-title">Environment Variables</h3>
         ${variablesHTML}
         ${headersHTML}
-        <div class="mt-4 flex gap-2">
+        <div class="action-buttons">
           <button 
             id="apply-env-vars" 
-            class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+            class="action-button apply-button"
           >
             Apply Variables
           </button>
           <button 
             id="clear-env-vars" 
-            class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+            class="action-button clear-button"
           >
             Clear All
           </button>

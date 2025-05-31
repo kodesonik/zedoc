@@ -110,31 +110,36 @@
             </div>
 
             <!-- Getting Started Section -->
-            <section id="getting-started" class="module-section">
-                <h2 class="module-title">Getting Started</h2>
-                <div class="endpoint-card">
-                    <div class="endpoint-details expanded">
-                        <div class="detail-section">
-                            <h4 class="detail-title">Base URL</h4>
-                            <div class="code-block">{{baseUrl}}</div>
-                        </div>
-                        <div class="detail-section">
-                            <h4 class="detail-title">Content Type</h4>
-                            <div class="code-block">application/json</div>
-                        </div>
-                        {{#if version}}
-                        <div class="detail-section">
-                            <h4 class="detail-title">API Version</h4>
-                            <p>Current version: <code>{{version}}</code></p>
-                        </div>
-                        {{/if}}
-                        {{#if environment}}
-                        <div class="detail-section">
-                            <h4 class="detail-title">Environment</h4>
-                            {{{environmentHTML}}}
-                        </div>
-                        {{/if}}
-                    </div>
+            <section id="getting-started" class="getting-started-section">
+                <h2 class="getting-started-title">Getting Started</h2>
+                
+                <div class="config-group">
+                    <label class="config-label">Base URL</label>
+                    <div class="config-input">{{baseUrl}}</div>
+                </div>
+
+                <div class="config-group">
+                    <label class="config-label">Content Type</label>
+                    <div class="config-input">application/json</div>
+                </div>
+
+                {{#if version}}
+                <div class="config-group">
+                    <label class="config-label">API Version</label>
+                    <div class="api-version-display">{{version}}</div>
+                </div>
+                {{/if}}
+
+                {{#if environment}}
+                <div class="environment-section">
+                    <h3 class="environment-title">Environment Configuration</h3>
+                    {{{environmentHTML}}}
+                </div>
+                {{/if}}
+
+                <div class="action-buttons">
+                    <button class="action-button apply-button">Apply Changes</button>
+                    <button class="action-button clear-button">Reset</button>
                 </div>
             </section>
 
@@ -217,7 +222,7 @@
                                     </div>
                                 </div>
                                 {{/if}}
-                                
+{{!--                                 
                                 {{#if requestExamples}}
                                 <div class="detail-section">
                                     <h4 class="detail-title">Request Examples</h4>
@@ -227,7 +232,7 @@
                                     </div>
                                     {{/each}}
                                 </div>
-                                {{/if}}
+                                {{/if}} --}}
                                 
                                 {{#if successResponse}}
                                 <div class="detail-section">
