@@ -106,15 +106,23 @@ export class ThemeService {
   }
 
   /**
-   * Load the enhanced CSS from the assets folder
+   * Load the enhanced CSS from the assets folder based on theme preset
    */
-  private loadEnhancedCSS(): string {
+  private loadEnhancedCSS(preset: string = 'basic'): string {
     try {
-      const cssPath = path.join(__dirname, '..', 'assets', 'docs.css');
+      // Map preset to CSS file name
+      const cssFileName = preset === 'custom' ? 'basic.css' : `${preset}.css`;
+      const cssPath = path.join(__dirname, '..', 'assets', cssFileName);
       return fs.readFileSync(cssPath, 'utf8');
     } catch (error) {
-      console.warn('Could not load enhanced CSS file, using fallback styles');
-      return this.getFallbackCSS();
+      console.warn(`Could not load CSS file for preset '${preset}', falling back to basic.css`);
+      try {
+        const fallbackPath = path.join(__dirname, '..', 'assets', 'basic.css');
+        return fs.readFileSync(fallbackPath, 'utf8');
+      } catch (fallbackError) {
+        console.warn('Could not load basic.css, using inline fallback styles');
+        return this.getFallbackCSS();
+      }
     }
   }
 
@@ -122,14 +130,15 @@ export class ThemeService {
    * Generate CSS custom properties for the theme
    */
   generateThemeCSS(themeConfig?: ThemeConfig): string {
+    const preset = themeConfig?.preset || 'basic';
     const colors = this.getResolvedTheme(themeConfig);
     
     const cssVariables = Object.entries(colors)
       .map(([key, value]) => `  --zedoc-${this.kebabCase(key)}: ${value};`)
       .join('\n');
     
-    // Load the enhanced CSS and combine with theme variables
-    const enhancedCSS = this.loadEnhancedCSS();
+    // Load the enhanced CSS based on preset and combine with theme variables
+    const enhancedCSS = this.loadEnhancedCSS(preset);
     
     return `${enhancedCSS}\n\n:root {\n${cssVariables}\n}`;
   }
