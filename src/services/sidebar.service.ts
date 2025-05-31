@@ -19,7 +19,7 @@ export class SidebarService {
     return {
       position: sidebarConfig?.position || 'left',
       searchbar: sidebarConfig?.searchbar !== false, // default true
-      tagsFilter: sidebarConfig?.tagsFilter !== false, // default true
+      rolesFilter: sidebarConfig?.rolesFilter !== false, // default true
       collapsible: sidebarConfig?.collapsible !== false, // default true
       width: sidebarConfig?.width || '320px',
       try: this.getResolvedTryConfig(sidebarConfig?.try, sidebarConfig?.position),
@@ -66,7 +66,7 @@ export class SidebarService {
   /**
    * Generate sidebar HTML structure
    */
-  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: Endpoint[], tags: string[], brandingConfig?: BrandingConfig): string {
+  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: Endpoint[], roles: string[], brandingConfig?: BrandingConfig): string {
     if (sidebarConfig.position === 'none') {
       return '';
     }
@@ -85,7 +85,7 @@ export class SidebarService {
         
         <div class="sidebar-content">
           ${sidebarConfig.searchbar ? this.generateSearchBar() : ''}
-          ${sidebarConfig.tagsFilter ? this.generateTagsFilter(tags) : ''}
+          ${sidebarConfig.rolesFilter ? this.generateRolesFilter(roles) : ''}
           ${this.generateEndpointsList(endpoints)}
         </div>
       </div>
@@ -117,10 +117,10 @@ export class SidebarService {
   /**
    * Generate tags filter HTML
    */
-  private generateTagsFilter(tags: string[]): string {
-    if (tags.length === 0) return '';
+  private generateRolesFilter(roles: string[]): string {
+    if (roles.length === 0) return '';
 
-    const tagOptions = tags.map(tag => 
+    const tagOptions = roles.map(tag => 
       `<label class="tag-filter-item">
         <input type="checkbox" value="${tag}" checked> 
         <span class="tag-name">${tag}</span>

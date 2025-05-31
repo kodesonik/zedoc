@@ -10,6 +10,7 @@ import { UsersController } from './users.controller';
       title: 'Auto-Structured API Documentation',
       description: 'Demonstrating automatic conversion of Swagger ApiTags to sections and ApiOperation summaries to modules',
       version: '3.0.0',
+      roles: ['admin', 'user', 'dealer', 'guest'],
       theme: {
         preset: 'default',
         mode: 'dark',
@@ -28,7 +29,7 @@ import { UsersController } from './users.controller';
       sidebar: {
         position: 'left',
         searchbar: true,
-        tagsFilter: true,
+        rolesFilter: true,
         collapsible: true,
         width: '350px',
         try: {
@@ -88,7 +89,7 @@ import { UsersController } from './users.controller';
           overlay: true,
           overlayColor: 'rgba(255, 108, 55, 0.8)'
         }
-      }
+      },
     }),
   ],
   controllers: [AppController, UsersController],

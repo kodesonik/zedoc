@@ -4,6 +4,7 @@ export interface DocumentationConfig {
   version?: string;
   basePath?: string;
   tags?: string[];
+  roles?: string[];
   servers?: Array<{
     url: string;
     description?: string;
@@ -75,7 +76,7 @@ export interface SidebarConfig {
   position?: 'left' | 'right' | 'none';
   try?: TryPanelConfig;
   searchbar?: boolean;
-  tagsFilter?: boolean;
+  rolesFilter?: boolean;
   collapsible?: boolean;
   width?: string;
 }
@@ -189,4 +190,5 @@ export interface TemplateData {
   environment?: EnvironmentConfig;
   branding?: BrandingConfig;
   tags?: string[];
+  roles?: string[];
 } 

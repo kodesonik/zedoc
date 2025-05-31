@@ -42,24 +42,24 @@
                         {{/if}}
                     </div>
                     <div class="header-controls">
-                        <button class="expand-all-btn" title="Expand all sections">⊞</button>
+                        {{!-- <button class="expand-all-btn" title="Expand all sections">⊞</button> --}}
                         <button class="theme-toggle">🌙</button>
                     </div>
                 </div>
-                <div class="subtitle">API Documentation</div>
-                {{#if version}}
-                <div class="version-badge">v{{version}}</div>
-                {{/if}}
+                <div class="header-bottom">
+                    <div class="subtitle">API Documentation</div>
+                    <div class="version">Version: {{version}}</div>
+                </div>
             </div>
             
             <!-- Search and Filter -->
             <div class="search-container">
                 <input type="text" class="search-input" placeholder="Search modules and endpoints..." />
                 <div class="role-filter">
-                    <label class="role-filter-label">Filter by tag:</label>
+                    <label class="role-filter-label">Filter by role:</label>
                     <div class="role-buttons">
                         <button class="role-btn active" data-role="all">All</button>
-                        {{#each tags}}
+                        {{#each roles}}
                         <button class="role-btn" data-role="{{this}}">{{this}}</button>
                         {{/each}}
                     </div>
@@ -175,10 +175,10 @@
                                     {{/if}}
                                 </div>
                                 
-                                {{#if tags}}
+                                {{#if roles}}
                                 <div class="detail-section">
-                                    <h4 class="detail-title">Tags</h4>
-                                    <p>{{formatTags tags}}</p>
+                                    <h4 class="detail-title">Roles</h4>
+                                    <p>{{formatRoles roles}}</p>
                                 </div>
                                 {{/if}}
                                 

@@ -58,6 +58,13 @@ export class DocumentationService {
       return tags || '';
     });
     
+    hbs.registerHelper('formatRoles', (roles: string | string[]) => {
+      if (Array.isArray(roles)) {
+        return roles.join(', ');
+      }
+      return roles || '';
+    });
+    
     // Theme-related helpers
     hbs.registerHelper('themeClass', (className: string, context: any) => {
       const themeClasses = this.themeService.getThemeClasses(context.data.root.theme);
@@ -212,6 +219,7 @@ export class DocumentationService {
       version: doc.info?.version || effectiveConfig.version || '1.0.0',
       sections,
       tags,
+      roles: effectiveConfig.roles,
       theme: effectiveConfig.theme,
       sidebar: effectiveConfig.sidebar,
       environment: effectiveConfig.environment,
@@ -262,7 +270,7 @@ export class DocumentationService {
   /**
    * Generate structured sidebar HTML
    */
-  private generateStructuredSidebarHTML(sidebarConfig: any, sections: SectionConfig[], tags: string[], brandingConfig?: any): string {
+  private generateStructuredSidebarHTML(sidebarConfig: any, sections: SectionConfig[], roles: string[], brandingConfig?: any): string {
     if (sidebarConfig.position === 'none') {
       return '';
     }
@@ -322,7 +330,7 @@ export class DocumentationService {
         
         <div class="sidebar-content">
           ${sidebarConfig.searchbar ? this.generateSearchBar() : ''}
-          ${sidebarConfig.tagsFilter ? this.generateTagsFilter(tags) : ''}
+          ${sidebarConfig.rolesFilter ? this.generateRolesFilter(this.config.roles || roles) : ''}
           <div class="sections-list">
             ${sectionsHTML}
           </div>
@@ -350,13 +358,13 @@ export class DocumentationService {
     `;
   }
 
-  private generateTagsFilter(tags: string[]): string {
-    if (tags.length === 0) return '';
+  private generateRolesFilter(roles: string[]): string {
+    if (roles.length === 0) return '';
 
-    const tagOptions = tags.map(tag => 
+    const roleOptions = roles.map(role => 
       `<label class="tag-filter-item">
-        <input type="checkbox" value="${tag}" checked> 
-        <span class="tag-name">${tag}</span>
+        <input type="checkbox" value="${role}" checked> 
+        <span class="tag-name">${role}</span>
       </label>`
     ).join('');
 
@@ -364,7 +372,7 @@ export class DocumentationService {
       <div class="tags-filter-section">
         <h4 class="filter-title">Filter by Tags</h4>
         <div class="tags-filter-list">
-          ${tagOptions}
+          ${roleOptions}
         </div>
       </div>
     `;
