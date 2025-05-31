@@ -480,7 +480,7 @@ export class SidebarService {
       /* Main Content Adjustment */
       .main-content {
         margin-${sidebarConfig.position}: ${sidebarConfig.width};
-        ${tryConfig.enabled ? `margin-${tryConfig.position}: ${tryConfig.width};` : ''}
+        // ${tryConfig.enabled ? `margin-${tryConfig.position}: ${tryConfig.width};` : ''}
         transition: margin 0.3s ease;
       }
 

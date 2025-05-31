@@ -68,6 +68,9 @@ body.dark {
 .container {
   display: flex;
   min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Sidebar - Insomnia style with minimal and clean design */
@@ -589,7 +592,13 @@ body.dark .expand-all-btn:hover {
   flex: 1;
   margin-left: 320px;
   padding: 2rem 2.5rem;
-  max-width: calc(100vw - 320px);
+  width: calc(100vw - 320px);
+  min-width: 0;
+  background-color: var(--light-bg);
+}
+
+body.dark .main-content {
+  background-color: var(--dark-bg);
 }
 
 .header {
@@ -1145,7 +1154,8 @@ body.dark .response-status {
   .main-content {
     margin-left: 0;
     padding: 4rem 1rem 2rem;
-    max-width: 100vw;
+    width: 100vw;
+    min-width: 0;
   }
 
   .header {
