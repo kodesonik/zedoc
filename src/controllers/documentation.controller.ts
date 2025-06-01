@@ -5,7 +5,7 @@ import { SwaggerIntegrationService } from '../services/swagger-integration.servi
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Documentation')
-@Controller('docs')
+@Controller('zedoc')
 export class DocumentationController {
   constructor(
     private readonly documentationService: DocumentationService,
