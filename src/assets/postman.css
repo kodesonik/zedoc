@@ -2630,4 +2630,146 @@ body.dark .import-button:hover {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Parameter Tables Styling - Postman Theme */
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(255, 108, 55, 0.1);
+}
+
+.params-table th {
+  background: linear-gradient(135deg, rgba(255, 108, 55, 0.9), rgba(255, 140, 66, 0.9));
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: none;
+  font-size: 0.8rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .params-table th {
+  background: linear-gradient(135deg, rgba(255, 140, 66, 0.8), rgba(255, 165, 89, 0.8));
+}
+
+.params-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid;
+  border-color: var(--light-border);
+  vertical-align: top;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+body.dark .params-table td {
+  border-color: var(--dark-border);
+  background: rgba(33, 33, 33, 0.8);
+}
+
+.param-name {
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--light-title-primary);
+}
+
+body.dark .param-name {
+  color: var(--dark-title-primary);
+}
+
+.required-asterisk {
+  color: #ff6c37;
+  font-weight: bold;
+  margin-left: 0.25rem;
+}
+
+.param-type {
+  font-family: 'JetBrains Mono', 'Monaco', monospace;
+  font-size: 0.8rem;
+  color: #ff6c37;
+  background: rgba(255, 108, 55, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+body.dark .param-type {
+  color: #ff8c42;
+  background: rgba(255, 140, 66, 0.15);
+}
+
+.param-in {
+  font-size: 0.75rem;
+  color: var(--light-text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+body.dark .param-in {
+  color: var(--dark-text-muted);
+}
+
+.param-description {
+  color: var(--light-text-secondary);
+  line-height: 1.4;
+}
+
+body.dark .param-description {
+  color: var(--dark-text-secondary);
+}
+
+.param-example code {
+  background: rgba(255, 108, 55, 0.1);
+  color: #ff6c37;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: 'JetBrains Mono', 'Monaco', monospace;
+  border: 1px solid rgba(255, 108, 55, 0.2);
+  font-weight: 500;
+}
+
+body.dark .param-example code {
+  background: rgba(255, 140, 66, 0.15);
+  color: #ff8c42;
+  border-color: rgba(255, 140, 66, 0.3);
+}
+
+.no-example {
+  color: var(--light-text-muted);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+body.dark .no-example {
+  color: var(--dark-text-muted);
+}
+
+/* Responsive Parameter Tables */
+@media (max-width: 768px) {
+  .params-table {
+    font-size: 0.75rem;
+  }
+  
+  .params-table th,
+  .params-table td {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .param-type {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .param-example code {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.3rem;
+  }
 } 

@@ -801,81 +801,149 @@ body.dark .error-status {
   color: #ef4444;
 }
 
-/* Parameters table - Clean Insomnia style */
+/* Parameter Tables Styling - Insomnia Theme */
 .params-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
   border-radius: 6px;
   overflow: hidden;
 }
 
-.params-table th,
-.params-table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid;
-}
-
 .params-table th {
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.param-name {
-  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--light-text-primary);
   font-weight: 500;
-}
-
-body.light .params-table th {
-  background-color: var(--light-hover);
-  color: var(--light-heading);
-  border-color: var(--light-border);
-}
-
-body.light .params-table td {
-  border-color: var(--light-border);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  font-size: 0.8rem;
 }
 
 body.dark .params-table th {
-  background-color: var(--dark-hover);
-  color: var(--dark-heading);
-  border-color: var(--dark-border);
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--dark-text-primary);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.params-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  vertical-align: top;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 body.dark .params-table td {
-  border-color: var(--dark-border);
+  border-color: rgba(139, 92, 246, 0.15);
+  background: rgba(39, 39, 42, 0.5);
 }
 
-/* Response items */
-.response-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+.param-name {
+  font-weight: 500;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--light-title-primary);
 }
 
-.response-status {
-  font-family: 'Fira Code', 'Roboto Mono', monospace;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
+body.dark .param-name {
+  color: var(--dark-title-primary);
 }
 
-body.light .response-status {
-  background-color: var(--light-hover);
-  color: var(--light-heading);
+.required-asterisk {
+  color: #7c3aed;
+  font-weight: 500;
+  margin-left: 0.25rem;
 }
 
-body.dark .response-status {
-  background-color: var(--dark-hover);
-  color: var(--dark-heading);
+body.dark .required-asterisk {
+  color: #8b5cf6;
 }
 
-.response-description {
-  flex: 1;
+.param-type {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8rem;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+body.dark .param-type {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.param-in {
+  font-size: 0.75rem;
+  color: var(--light-text-muted);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+body.dark .param-in {
+  color: var(--dark-text-muted);
+}
+
+.param-description {
+  color: var(--light-text-secondary);
+  line-height: 1.4;
+}
+
+body.dark .param-description {
+  color: var(--dark-text-secondary);
+}
+
+.param-example code {
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  font-weight: 500;
+}
+
+body.dark .param-example code {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.no-example {
+  color: var(--light-text-muted);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+body.dark .no-example {
+  color: var(--dark-text-muted);
+}
+
+/* Responsive Parameter Tables */
+@media (max-width: 768px) {
+  .params-table {
+    font-size: 0.75rem;
+  }
+  
+  .params-table th,
+  .params-table td {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .param-type {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .param-example code {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.3rem;
+  }
 }
 
 /* Mobile menu button */

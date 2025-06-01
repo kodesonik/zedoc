@@ -255,8 +255,37 @@
                                 {{#if parameters}}
                                 <div class="detail-section">
                                     <h4 class="detail-title">Parameters</h4>
-                                    <div class="code-block json-code">
-                                        <pre><code class="language-json">{{json parameters}}</code></pre>
+                                    <div class="overflow-x-auto">
+                                        <table class="params-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>In</th>
+                                                    <th>Description</th>
+                                                    <th>Example</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {{#each parameters}}
+                                                <tr>
+                                                    <td class="param-name">
+                                                        {{name}}{{#if required}}<span class="required-asterisk">*</span>{{/if}}
+                                                    </td>
+                                                    <td class="param-type">{{type}}</td>
+                                                    <td class="param-in">{{in}}</td>
+                                                    <td class="param-description">{{description}}</td>
+                                                    <td class="param-example">
+                                                        {{#if example}}
+                                                        <code>{{example}}</code>
+                                                        {{else}}
+                                                        <span class="no-example">-</span>
+                                                        {{/if}}
+                                                    </td>
+                                                </tr>
+                                                {{/each}}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                                 {{/if}}
@@ -264,8 +293,35 @@
                                 {{#if requestHeaders}}
                                 <div class="detail-section">
                                     <h4 class="detail-title">Request Headers</h4>
-                                    <div class="code-block json-code">
-                                        <pre><code class="language-json">{{json requestHeaders}}</code></pre>
+                                    <div class="overflow-x-auto">
+                                        <table class="params-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>Description</th>
+                                                    <th>Example</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {{#each requestHeaders}}
+                                                <tr>
+                                                    <td class="param-name">
+                                                        {{name}}{{#if required}}<span class="required-asterisk">*</span>{{/if}}
+                                                    </td>
+                                                    <td class="param-type">{{type}}</td>
+                                                    <td class="param-description">{{description}}</td>
+                                                    <td class="param-example">
+                                                        {{#if example}}
+                                                        <code>{{example}}</code>
+                                                        {{else}}
+                                                        <span class="no-example">-</span>
+                                                        {{/if}}
+                                                    </td>
+                                                </tr>
+                                                {{/each}}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                                 {{/if}}
@@ -366,18 +422,26 @@
                                                 <th>Name</th>
                                                 <th>Type</th>
                                                 <th>In</th>
-                                                <th>Required</th>
                                                 <th>Description</th>
+                                                <th>Example</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {{#each parameters}}
                                             <tr>
-                                                <td class="param-name">{{name}}</td>
-                                                <td>{{type}}</td>
-                                                <td>{{in}}</td>
-                                                <td>{{#if required}}Yes{{else}}No{{/if}}</td>
-                                                <td>{{description}}</td>
+                                                <td class="param-name">
+                                                    {{name}}{{#if required}}<span class="required-asterisk">*</span>{{/if}}
+                                                </td>
+                                                <td class="param-type">{{type}}</td>
+                                                <td class="param-in">{{in}}</td>
+                                                <td class="param-description">{{description}}</td>
+                                                <td class="param-example">
+                                                    {{#if example}}
+                                                    <code>{{example}}</code>
+                                                    {{else}}
+                                                    <span class="no-example">-</span>
+                                                    {{/if}}
+                                                </td>
                                             </tr>
                                             {{/each}}
                                         </tbody>
