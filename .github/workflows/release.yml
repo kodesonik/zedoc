@@ -1,0 +1,158 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version type (patch, minor, major) or specific version (e.g., 1.0.0)'
+        required: true
+        default: 'patch'
+        type: string
+      prerelease:
+        description: 'Create as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Build package
+        run: npm run build
+      
+      - name: Bump version
+        id: version
+        run: |
+          if [[ "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Specific version provided
+            NEW_VERSION="${{ github.event.inputs.version }}"
+            npm version $NEW_VERSION --no-git-tag-version
+          else
+            # Version type provided (patch, minor, major)
+            NEW_VERSION=$(npm version ${{ github.event.inputs.version }} --no-git-tag-version)
+            NEW_VERSION=${NEW_VERSION#v}  # Remove 'v' prefix if present
+          fi
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          echo "New version: $NEW_VERSION"
+          echo "Tag name: v$NEW_VERSION"
+      
+      - name: Update README with new version
+        run: |
+          # Update installation commands in README
+          sed -i "s/npm install @kodesonik\/zedoc@[0-9]\+\.[0-9]\+\.[0-9]\+/npm install @kodesonik\/zedoc@${{ steps.version.outputs.new_version }}/g" README.md
+          
+          # Check if any changes were made
+          if git diff --quiet README.md; then
+            echo "No version references found in README to update"
+          else
+            echo "Updated version references in README"
+            git add README.md
+          fi
+      
+      - name: Commit version changes
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to v${{ steps.version.outputs.new_version }}"
+      
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.version.outputs.tag_name }}
+          git push origin main
+          git push origin ${{ steps.version.outputs.tag_name }}
+      
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Generating changelog from $PREVIOUS_TAG to ${{ steps.version.outputs.tag_name }}"
+            CHANGES=$(git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s" --no-merges)
+          else
+            echo "No previous tag found, listing recent commits"
+            CHANGES=$(git log --pretty=format:"- %s" --no-merges -10)
+          fi
+          
+          cat > release_notes.md << EOF
+          ## 🎉 Release ${{ steps.version.outputs.new_version }}
+          
+          ### Features & Enhancements
+          - ⚡ Enhanced try panel with intelligent variable replacement
+          - 🎨 4 professional theme presets (Default/Solarized, Postman, Insomnia, Swagger)
+          - 📊 Professional parameter tables with type indicators
+          - 🌍 Advanced environment variable system with \`{}\` and \`{{}}\` syntax
+          - 📱 Mobile-responsive design optimized for all devices
+          - 🔍 Smart sidebar navigation with search and filtering
+          
+          ### Installation
+          \`\`\`bash
+          npm install @kodesonik/zedoc@${{ steps.version.outputs.new_version }}
+          \`\`\`
+          
+          ### What Changed
+          $CHANGES
+          
+          ### Documentation
+          See the [README](https://github.com/kodesonik/zedoc#readme) for complete documentation and examples.
+          
+          ### Support
+          - 📖 [Documentation](https://github.com/kodesonik/zedoc#readme)
+          - 🐛 [Report Issues](https://github.com/kodesonik/zedoc/issues)
+          - 💬 [Discussions](https://github.com/kodesonik/zedoc/discussions)
+          EOF
+          
+          echo "Release notes generated"
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          release_name: "🚀 Release ${{ steps.version.outputs.new_version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease }}
+      
+      - name: Success notification
+        run: |
+          echo "✅ Release ${{ steps.version.outputs.new_version }} created successfully!"
+          echo "🏷️  Tag: ${{ steps.version.outputs.tag_name }}"
+          echo "📦 The publish workflow will automatically publish to npm when the tag is pushed." 

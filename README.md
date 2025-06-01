@@ -559,6 +559,10 @@ npm run build
 npm run test
 ```
 
+### 🚀 Release Process
+
+For information about creating releases and publishing the package, see [RELEASING.md](RELEASING.md).
+
 ## 📄 License
 
 This project is licensed under the MIT License. 

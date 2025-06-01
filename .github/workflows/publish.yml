@@ -1,0 +1,89 @@
+name: Publish Package
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v0.0.1, v1.0.0, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for better changelog generation
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Build package
+        run: npm run build
+      
+      - name: Extract tag version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+      - name: Update package.json version
+        run: |
+          # Remove 'v' prefix from tag if present
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          VERSION=${VERSION#v}
+          npm version $VERSION --no-git-tag-version
+          echo "Publishing version: $VERSION"
+      
+      - name: Verify package contents
+        run: |
+          echo "Package contents:"
+          npm pack --dry-run
+      
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Changes in ${{ steps.get_version.outputs.VERSION }}
+            
+            🎉 New release of @kodesonik/zedoc!
+            
+            ### What's New
+            - Enhanced try panel with variable replacement
+            - 4 professional theme presets (Default, Postman, Insomnia, Swagger)
+            - Professional parameter tables
+            - Advanced environment variable system
+            - Mobile-responsive design
+            
+            ### Installation
+            ```bash
+            npm install @kodesonik/zedoc@${{ steps.get_version.outputs.VERSION }}
+            ```
+            
+            See the [README](https://github.com/kodesonik/zedoc#readme) for full documentation.
+          draft: false
+          prerelease: false 
