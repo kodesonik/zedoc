@@ -166,8 +166,20 @@
                         </button>
                     </div>
                     
-                    <div class="environment-variables-list" id="environmentVariablesList">
-                        <!-- Dynamic environment variables will be inserted here -->
+                    <div class="environment-variables-table-container">
+                        <table class="environment-variables-table" id="environmentVariablesTable">
+                            <thead>
+                                <tr>
+                                    <th class="env-var-name-header">Variable Name</th>
+                                    <th class="env-var-value-header">Value</th>
+                                    <th class="env-var-description-header">Description (Optional)</th>
+                                    <th class="env-var-actions-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="environmentVariablesList">
+                                <!-- Dynamic environment variables will be inserted here -->
+                            </tbody>
+                        </table>
                     </div>
                     
                     <div class="environment-variables-empty" id="environmentVariablesEmpty">
@@ -916,13 +928,13 @@
             const container = document.getElementById('environmentVariablesList');
             if (!container) return;
             
-            const items = container.querySelectorAll('.env-var-item');
+            const rows = container.querySelectorAll('.env-var-row');
             environmentVariables = [];
             
-            items.forEach((item, index) => {
-                const keyInput = item.querySelector('.env-var-key');
-                const valueInput = item.querySelector('.env-var-value');
-                const descInput = item.querySelector('.env-var-description');
+            rows.forEach((row, index) => {
+                const keyInput = row.querySelector('.env-var-key');
+                const valueInput = row.querySelector('.env-var-value');
+                const descInput = row.querySelector('.env-var-description');
                 
                 if (keyInput && valueInput && descInput) {
                     environmentVariables.push({
@@ -938,39 +950,37 @@
         function renderEnvironmentVariables() {
             const container = document.getElementById('environmentVariablesList');
             const emptyState = document.getElementById('environmentVariablesEmpty');
+            const tableContainer = document.querySelector('.environment-variables-table-container');
             
-            if (!container || !emptyState) return;
+            if (!container || !emptyState || !tableContainer) return;
             
             if (environmentVariables.length === 0) {
                 container.innerHTML = '';
                 emptyState.style.display = 'block';
+                tableContainer.style.display = 'none';
                 return;
             }
             
             emptyState.style.display = 'none';
+            tableContainer.style.display = 'block';
             
             container.innerHTML = environmentVariables.map((envVar, index) => `
-                <div class="env-var-item" data-index="${index}">
-                    <div class="env-var-inputs">
-                        <div class="env-var-input-group">
-                            <label class="env-var-label">Variable Name</label>
-                            <input type="text" class="env-var-key env-input" value="${escapeHtml(envVar.key)}" placeholder="VARIABLE_NAME">
-                        </div>
-                        <div class="env-var-input-group">
-                            <label class="env-var-label">Value</label>
-                            <input type="text" class="env-var-value env-input" value="${escapeHtml(envVar.value)}" placeholder="variable-value">
-                        </div>
-                        <div class="env-var-input-group env-var-description-group">
-                            <label class="env-var-label">Description (Optional)</label>
-                            <input type="text" class="env-var-description env-input" value="${escapeHtml(envVar.description)}" placeholder="Description of this variable">
-                        </div>
-                    </div>
-                    <div class="env-var-actions">
+                <tr class="env-var-row" data-index="${index}">
+                    <td class="env-var-name-cell">
+                        <input type="text" class="env-var-key env-table-input" value="${escapeHtml(envVar.key)}" placeholder="VARIABLE_NAME">
+                    </td>
+                    <td class="env-var-value-cell">
+                        <input type="text" class="env-var-value env-table-input" value="${escapeHtml(envVar.value)}" placeholder="variable-value">
+                    </td>
+                    <td class="env-var-description-cell">
+                        <input type="text" class="env-var-description env-table-input" value="${escapeHtml(envVar.description)}" placeholder="Description of this variable">
+                    </td>
+                    <td class="env-var-actions-cell">
                         <button type="button" class="remove-env-var-btn" onclick="removeEnvironmentVariable(${index})" title="Remove Variable">
-                            <span class="btn-icon">🗑️</span>
+                            🗑️
                         </button>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             `).join('');
         }
         
