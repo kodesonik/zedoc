@@ -443,7 +443,7 @@
                 </div>
                 
                 <div class="query-section" id="querySection" style="display: none;">
-                    <label class="input-label">Query Parameters</label>
+                    <label class="input-label">Parameters</label>
                     <div class="query-form" id="queryForm">
                         <!-- Query parameters will be dynamically populated here -->
                     </div>
@@ -842,8 +842,8 @@
                 } else {
                     // Add some default examples
                     environmentVariables = [
-                        { key: 'API_TOKEN', value: 'your-api-token-here', description: 'Authorization token for API requests' },
-                        { key: 'BASE_URL', value: '{{baseUrl}}', description: 'Base URL for all API endpoints' }
+                        { key: 'BASE_URL', value: '{{baseUrl}}', description: 'Base URL for all API endpoints' },
+                        { key: 'API_TOKEN', value: 'your-api-token-here', description: 'Authorization token for API requests' }
                     ];
                 }
             } catch (e) {

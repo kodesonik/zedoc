@@ -721,11 +721,10 @@ class ApiTesterManager {
       methodSelect.value = method;
     }
 
-    // Set URL with variable replacement
+    // Set URL with BASE_URL variable for replacement
     const urlInput = document.getElementById('requestUrl');
     if (urlInput) {
-      const baseUrl = window.location.origin;
-      const fullUrl = `${baseUrl}${path}`;
+      const fullUrl = `{BASE_URL}${path}`;
       urlInput.value = this.replaceUrlVariables(fullUrl);
     }
 
@@ -735,22 +734,23 @@ class ApiTesterManager {
     // Populate headers table
     this.populateHeadersTable(endpointData.headers);
     
-    // Populate query parameters table
+    // Always populate query parameters table (for all methods)
     this.populateQueryTable(endpointData.parameters);
     
     // Pre-fill request body
     this.populateRequestBody(endpointData.requestBody);
 
-    // Show/hide sections based on method
+    // Show/hide sections based on method, but always show parameters
     const querySection = document.getElementById('querySection');
     const bodySection = document.querySelector('.body-section');
     
     if (querySection && bodySection) {
+      // Always show query parameters section
+      querySection.style.display = 'block';
+      
       if (method === 'GET' || method === 'DELETE') {
-        querySection.style.display = 'block';
         bodySection.style.display = 'none';
       } else {
-        querySection.style.display = 'none';
         bodySection.style.display = 'block';
       }
     }
@@ -848,12 +848,30 @@ class ApiTesterManager {
     // Clear existing parameters
     queryForm.innerHTML = '';
 
-    // Add query parameters
-    const queryParams = parameters.filter(param => param.in === 'query');
-    queryParams.forEach(param => {
-      const defaultValue = param.required ? '' : `{{${param.name.toUpperCase()}}}`;
-      this.addQueryRow(param.name, defaultValue, param.description);
+    // Add all parameters (query, path, header parameters)
+    parameters.forEach(param => {
+      let defaultValue = '';
+      
+      // For path parameters, suggest variable replacement
+      if (param.in === 'path') {
+        defaultValue = `{${param.name}}`;
+      } 
+      // For query parameters, suggest environment variable
+      else if (param.in === 'query') {
+        defaultValue = param.required ? '' : `{{${param.name.toUpperCase()}}}`;
+      }
+      // For header parameters, suggest environment variable
+      else if (param.in === 'header') {
+        defaultValue = `{{${param.name.toUpperCase()}}}`;
+      }
+      
+      this.addQueryRow(param.name, defaultValue, `${param.description || ''} (${param.in} parameter)`, param.in);
     });
+
+    // If no parameters exist, add a default example
+    if (parameters.length === 0) {
+      this.addQueryRow('', '', 'Add query parameters here', 'query');
+    }
   }
 
   populateRequestBody(requestBody) {
@@ -904,7 +922,7 @@ class ApiTesterManager {
     headersForm.appendChild(headerRow);
   }
 
-  addQueryRow(key = '', value = '', description = '') {
+  addQueryRow(key = '', value = '', description = '', paramType = 'query') {
     const queryForm = document.getElementById('queryForm');
     if (!queryForm) return;
 
@@ -912,7 +930,7 @@ class ApiTesterManager {
     queryRow.className = 'query-row';
     queryRow.style.cssText = `
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: 1fr 1fr 2fr auto;
       gap: 0.5rem;
       margin-bottom: 0.5rem;
       align-items: center;
@@ -921,8 +939,12 @@ class ApiTesterManager {
     queryRow.innerHTML = `
       <input type="text" class="query-key" placeholder="Parameter Name" value="${this.escapeHtml(key)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem;">
       <input type="text" class="query-value" placeholder="Parameter Value" value="${this.escapeHtml(value)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem; font-family: 'Fira Code', monospace;" title="${this.escapeHtml(description)}">
+      <input type="text" class="query-description" placeholder="Description" value="${this.escapeHtml(description)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem;" readonly>
       <button type="button" class="remove-query-btn" style="padding: 0.5rem; border: none; background: none; cursor: pointer; color: #ef4444; font-size: 0.875rem;" title="Remove Parameter">🗑️</button>
     `;
+
+    // Store parameter type as data attribute
+    queryRow.setAttribute('data-param-type', paramType);
 
     // Add remove functionality
     queryRow.querySelector('.remove-query-btn').addEventListener('click', () => {
@@ -969,19 +991,24 @@ class ApiTesterManager {
     return headers;
   }
 
-  // Collect query parameters from the form
+  // Collect query parameters from the form (only actual query parameters for URL)
   collectQueryParams() {
     const params = new URLSearchParams();
     const queryRows = document.querySelectorAll('.query-row');
     
     queryRows.forEach(row => {
-      const keyInput = row.querySelector('.query-key');
-      const valueInput = row.querySelector('.query-value');
+      const paramType = row.getAttribute('data-param-type');
       
-      if (keyInput && valueInput && keyInput.value.trim() && valueInput.value.trim()) {
-        const key = keyInput.value.trim();
-        const value = this.replaceDoubleVariables(valueInput.value.trim());
-        params.append(key, value);
+      // Only include actual query parameters in the URL
+      if (paramType === 'query') {
+        const keyInput = row.querySelector('.query-key');
+        const valueInput = row.querySelector('.query-value');
+        
+        if (keyInput && valueInput && keyInput.value.trim() && valueInput.value.trim()) {
+          const key = keyInput.value.trim();
+          const value = this.replaceDoubleVariables(valueInput.value.trim());
+          params.append(key, value);
+        }
       }
     });
 
@@ -993,19 +1020,17 @@ class ApiTesterManager {
     let url = document.getElementById('requestUrl').value;
     const bodyText = document.getElementById('requestBody').value;
 
-    // Apply URL variable replacement
+    // Apply URL variable replacement for path parameters and BASE_URL
     url = this.replaceUrlVariables(url);
 
     // Collect headers
     const headers = this.collectHeaders();
 
-    // Collect query parameters for GET requests
-    if (method === 'GET' || method === 'DELETE') {
-      const queryParams = this.collectQueryParams();
-      if (queryParams.toString()) {
-        const separator = url.includes('?') ? '&' : '?';
-        url += separator + queryParams.toString();
-      }
+    // Collect query parameters and apply them to the URL
+    const queryParams = this.collectQueryParams();
+    if (queryParams.toString()) {
+      const separator = url.includes('?') ? '&' : '?';
+      url += separator + queryParams.toString();
     }
 
     // Show loading state
@@ -1173,7 +1198,8 @@ class ApiTesterManager {
     div.textContent = text;
     return div.innerHTML;
   }
-} 
+}
+
 // Initialize the application when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeApp);
