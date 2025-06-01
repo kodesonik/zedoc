@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
-import { SectionConfig, ModuleConfig, EndpointConfig } from '../interfaces/documentation.interface';
+import { SectionConfig, ModuleConfig, Endpoint } from '../interfaces/documentation.interface';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -264,8 +264,8 @@ export class SwaggerIntegrationService {
       Object.keys(moduleGroups).forEach(moduleName => {
         const moduleEndpoints = moduleGroups[moduleName];
         
-        const endpointConfigs: EndpointConfig[] = moduleEndpoints.map(ep => {
-          const endpointConfig: EndpointConfig = {
+        const endpointConfigs: Endpoint[] = moduleEndpoints.map(ep => {
+          const endpointConfig: Endpoint = {
             method: ep.method,
             path: ep.path,
             summary: ep.summary,

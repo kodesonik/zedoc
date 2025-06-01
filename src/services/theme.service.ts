@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ThemeConfig, ThemeColors } from '../interfaces/documentation.interface';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ThemeService {
   private readonly presetThemes: Record<string, ThemeColors> = {
-    basic: {
+    default: {
       primary: '#3b82f6',
       secondary: '#64748b',
       tertiary: '#8b5cf6',
@@ -84,11 +86,11 @@ export class ThemeService {
    * Get the complete theme configuration with resolved colors
    */
   getResolvedTheme(themeConfig?: ThemeConfig): ThemeColors {
-    const preset = themeConfig?.preset || 'basic';
+    const preset = themeConfig?.preset || 'default';
     const mode = themeConfig?.mode || 'light';
     
     // Start with preset theme
-    let colors: ThemeColors = { ...this.presetThemes[preset] || this.presetThemes.basic };
+    let colors: ThemeColors = { ...this.presetThemes[preset] || this.presetThemes.default };
     
     // Apply dark mode overrides if needed
     if (mode === 'dark') {
@@ -104,16 +106,59 @@ export class ThemeService {
   }
 
   /**
+   * Load the enhanced CSS from the assets folder based on theme preset
+   */
+  private loadEnhancedCSS(preset: string = 'default'): string {
+    try {
+      // Map preset to CSS file name
+      const cssFileName = preset === 'custom' ? 'default.css' : `${preset}.css`;
+      const cssPath = path.join(__dirname, '..', 'assets', cssFileName);
+      return fs.readFileSync(cssPath, 'utf8');
+    } catch (error) {
+      console.warn(`Could not load CSS file for preset '${preset}', falling back to default.css`);
+      try {
+        const fallbackPath = path.join(__dirname, '..', 'assets', 'default.css');
+        return fs.readFileSync(fallbackPath, 'utf8');
+      } catch (fallbackError) {
+        console.warn('Could not load default.css, using inline fallback styles');
+        return this.getFallbackCSS();
+      }
+    }
+  }
+
+  /**
    * Generate CSS custom properties for the theme
    */
   generateThemeCSS(themeConfig?: ThemeConfig): string {
+    const preset = themeConfig?.preset || 'default';
     const colors = this.getResolvedTheme(themeConfig);
     
     const cssVariables = Object.entries(colors)
       .map(([key, value]) => `  --zedoc-${this.kebabCase(key)}: ${value};`)
       .join('\n');
     
-    return `:root {\n${cssVariables}\n}`;
+    // Load the enhanced CSS based on preset and combine with theme variables
+    const enhancedCSS = this.loadEnhancedCSS(preset);
+    
+    return `${enhancedCSS}\n\n:root {\n${cssVariables}\n}`;
+  }
+
+  /**
+   * Fallback CSS if the enhanced CSS file cannot be loaded
+   */
+  private getFallbackCSS(): string {
+    return `
+      /* Fallback CSS */
+      body { font-family: 'Inter', sans-serif; }
+      .sidebar { width: 280px; position: fixed; height: 100vh; overflow-y: auto; }
+      .main-content { margin-left: 280px; padding: 2rem; }
+      .endpoint-card { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1rem; }
+      .endpoint-header { padding: 1rem; cursor: pointer; }
+      .endpoint-details { padding: 1rem; display: none; }
+      .endpoint-details.expanded { display: block; }
+      .method-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+      .theme-toggle { background: none; border: 1px solid #e2e8f0; border-radius: 50%; padding: 0.5rem; cursor: pointer; }
+    `;
   }
 
   /**

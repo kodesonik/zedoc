@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SidebarConfig, TryPanelConfig, EndpointInfo, EnvironmentConfig, BrandingConfig } from '../interfaces/documentation.interface';
+import { SidebarConfig, TryPanelConfig, Endpoint, EnvironmentConfig, BrandingConfig } from '../interfaces/documentation.interface';
 import { EnvironmentService } from './environment.service';
 import { BrandingService } from './branding.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class SidebarService {
@@ -17,9 +19,9 @@ export class SidebarService {
     return {
       position: sidebarConfig?.position || 'left',
       searchbar: sidebarConfig?.searchbar !== false, // default true
-      tagsFilter: sidebarConfig?.tagsFilter !== false, // default true
+      rolesFilter: sidebarConfig?.rolesFilter !== false, // default true
       collapsible: sidebarConfig?.collapsible !== false, // default true
-      width: sidebarConfig?.width || '320px',
+      width: sidebarConfig?.width || '250px',
       try: this.getResolvedTryConfig(sidebarConfig?.try, sidebarConfig?.position),
     };
   }
@@ -53,7 +55,7 @@ export class SidebarService {
   /**
    * Extract unique tags from endpoints
    */
-  extractTags(endpoints: EndpointInfo[]): string[] {
+  extractTags(endpoints: Endpoint[]): string[] {
     const tagsSet = new Set<string>();
     endpoints.forEach(endpoint => {
       endpoint.tags?.forEach(tag => tagsSet.add(tag));
@@ -64,7 +66,7 @@ export class SidebarService {
   /**
    * Generate sidebar HTML structure
    */
-  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: EndpointInfo[], tags: string[], brandingConfig?: BrandingConfig): string {
+  generateSidebarHTML(sidebarConfig: SidebarConfig, endpoints: Endpoint[], roles: string[], brandingConfig?: BrandingConfig): string {
     if (sidebarConfig.position === 'none') {
       return '';
     }
@@ -83,7 +85,7 @@ export class SidebarService {
         
         <div class="sidebar-content">
           ${sidebarConfig.searchbar ? this.generateSearchBar() : ''}
-          ${sidebarConfig.tagsFilter ? this.generateTagsFilter(tags) : ''}
+          ${sidebarConfig.rolesFilter ? this.generateRolesFilter(roles) : ''}
           ${this.generateEndpointsList(endpoints)}
         </div>
       </div>
@@ -115,10 +117,10 @@ export class SidebarService {
   /**
    * Generate tags filter HTML
    */
-  private generateTagsFilter(tags: string[]): string {
-    if (tags.length === 0) return '';
+  private generateRolesFilter(roles: string[]): string {
+    if (roles.length === 0) return '';
 
-    const tagOptions = tags.map(tag => 
+    const tagOptions = roles.map(tag => 
       `<label class="tag-filter-item">
         <input type="checkbox" value="${tag}" checked> 
         <span class="tag-name">${tag}</span>
@@ -138,7 +140,7 @@ export class SidebarService {
   /**
    * Generate endpoints list HTML
    */
-  private generateEndpointsList(endpoints: EndpointInfo[]): string {
+  private generateEndpointsList(endpoints: Endpoint[]): string {
     const groupedEndpoints = this.groupEndpointsByTag(endpoints);
     
     let html = '<div class="endpoints-list">';
@@ -151,12 +153,10 @@ export class SidebarService {
       `;
       
       tagEndpoints.forEach(endpoint => {
-        const methodClass = `method-${endpoint.method.toLowerCase()}`;
+        const title = endpoint.summary || `${endpoint.method} ${endpoint.path}`;
         html += `
           <a href="#endpoint-${this.generateEndpointId(endpoint)}" class="endpoint-link" data-method="${endpoint.method}" data-path="${endpoint.path}">
-            <span class="endpoint-method ${methodClass}">${endpoint.method}</span>
-            <span class="endpoint-path">${endpoint.path}</span>
-            ${endpoint.summary ? `<span class="endpoint-summary">${endpoint.summary}</span>` : ''}
+            <span class="endpoint-title">${title}</span>
           </a>
         `;
       });
@@ -174,8 +174,8 @@ export class SidebarService {
   /**
    * Group endpoints by their first tag
    */
-  private groupEndpointsByTag(endpoints: EndpointInfo[]): Record<string, EndpointInfo[]> {
-    const grouped: Record<string, EndpointInfo[]> = {};
+  private groupEndpointsByTag(endpoints: Endpoint[]): Record<string, Endpoint[]> {
+    const grouped: Record<string, Endpoint[]> = {};
     
     endpoints.forEach(endpoint => {
       const tag = endpoint.tags?.[0] || 'General';
@@ -468,24 +468,10 @@ export class SidebarService {
         border-color: var(--zedoc-border, #e2e8f0);
       }
 
-      .endpoint-method {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.125rem 0.5rem;
-        border-radius: 0.25rem;
-        width: fit-content;
-      }
-
-      .endpoint-path {
-        font-family: monospace;
+      .endpoint-title {
         font-size: 0.875rem;
+        font-weight: 600;
         color: var(--zedoc-text, #1e293b);
-        font-weight: 500;
-      }
-
-      .endpoint-summary {
-        font-size: 0.75rem;
-        color: var(--zedoc-text-secondary, #64748b);
       }
 
       /* Try Panel Styles */
@@ -494,7 +480,7 @@ export class SidebarService {
       /* Main Content Adjustment */
       .main-content {
         margin-${sidebarConfig.position}: ${sidebarConfig.width};
-        ${tryConfig.enabled ? `margin-${tryConfig.position}: ${tryConfig.width};` : ''}
+        // ${tryConfig.enabled ? `margin-${tryConfig.position}: ${tryConfig.width};` : ''}
         transition: margin 0.3s ease;
       }
 
@@ -588,406 +574,109 @@ export class SidebarService {
   }
 
   /**
-   * Generate sidebar JavaScript
+   * Load the enhanced JavaScript from the assets folder
    */
+  private loadEnhancedJS(): string {
+    try {
+      const jsPath = path.join(__dirname, '..', 'assets', 'docs.js');
+      return fs.readFileSync(jsPath, 'utf8');
+    } catch (error) {
+      console.warn('Could not load enhanced JavaScript file, using fallback scripts');
+      return this.getFallbackJS();
+    }
+  }
+
+  /**
+   * Fallback JavaScript if the enhanced JS file cannot be loaded
+   */
+  private getFallbackJS(): string {
+    return `
+      // Fallback JavaScript
+      document.addEventListener('DOMContentLoaded', function() {
+        // Basic theme toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            document.body.classList.toggle('light');
+          });
+        }
+        
+        // Basic endpoint expansion
+        document.querySelectorAll('.endpoint-header').forEach(header => {
+          header.addEventListener('click', function() {
+            const details = header.nextElementSibling;
+            if (details) {
+              details.classList.toggle('expanded');
+            }
+          });
+        });
+      });
+    `;
+  }
+
   generateSidebarJS(): string {
-    const environmentJS = this.environmentService.generateEnvironmentJS();
+    // const environmentJS = this.environmentService.generateEnvironmentJS();
+    const enhancedJS = this.loadEnhancedJS();
     
     return `
-      <script>
-        ${environmentJS}
-        
-        (function() {
-          // Sidebar functionality
-          const sidebar = document.getElementById('zedoc-sidebar');
-          const sidebarToggle = document.getElementById('sidebar-toggle');
-          const mainContent = document.querySelector('.main-content');
-          const tryPanel = document.getElementById('try-panel');
-          const tryPanelToggle = document.getElementById('try-panel-toggle');
-          
-          // Sidebar toggle
-          if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function() {
-              sidebar.classList.toggle('collapsed');
-              if (mainContent) {
-                mainContent.classList.toggle('sidebar-collapsed');
-              }
-            });
-          }
-          
-          // Try panel toggle
-          if (tryPanelToggle) {
-            tryPanelToggle.addEventListener('click', function() {
-              tryPanel.classList.toggle('collapsed');
-              const icon = tryPanelToggle.querySelector('.try-panel-toggle-icon');
-              if (icon) {
-                icon.textContent = tryPanel.classList.contains('collapsed') ? '▶' : '◀';
-              }
-            });
-          }
-          
-          // Initialize try panel state
-          if (tryPanel) {
-            const defaultExpanded = tryPanel.dataset.defaultExpanded === 'true';
-            if (!defaultExpanded) {
-              tryPanel.classList.add('collapsed');
-              const icon = tryPanelToggle?.querySelector('.try-panel-toggle-icon');
-              if (icon) icon.textContent = '▶';
-            }
-          }
-          
-          // Search functionality
-          const searchInput = document.getElementById('endpoint-search');
-          if (searchInput) {
-            searchInput.addEventListener('input', function() {
-              const searchTerm = this.value.toLowerCase();
-              const endpointLinks = document.querySelectorAll('.endpoint-link');
-              
-              endpointLinks.forEach(link => {
-                const method = link.dataset.method.toLowerCase();
-                const path = link.dataset.path.toLowerCase();
-                const summary = link.querySelector('.endpoint-summary')?.textContent.toLowerCase() || '';
-                
-                const matches = method.includes(searchTerm) || 
-                               path.includes(searchTerm) || 
-                               summary.includes(searchTerm);
-                
-                link.style.display = matches ? 'flex' : 'none';
-              });
-              
-              // Hide empty groups
-              const groups = document.querySelectorAll('.endpoint-group');
-              groups.forEach(group => {
-                const visibleLinks = group.querySelectorAll('.endpoint-link[style*="flex"]');
-                group.style.display = visibleLinks.length > 0 ? 'block' : 'none';
-              });
-            });
-          }
-          
-          // Tags filter functionality
-          const tagFilters = document.querySelectorAll('.tag-filter-item input[type="checkbox"]');
-          tagFilters.forEach(filter => {
-            filter.addEventListener('change', function() {
-              const selectedTags = Array.from(tagFilters)
-                .filter(f => f.checked)
-                .map(f => f.value);
-              
-              if (selectedTags.length === 0) {
-                // Show all groups if no tags selected
-                const groups = document.querySelectorAll('.endpoint-group');
-                groups.forEach(group => {
-                  group.style.display = 'block';
-                });
-              } else {
-                // Show only selected tags
-                const groups = document.querySelectorAll('.endpoint-group');
-                groups.forEach(group => {
-                  const tag = group.dataset.tag;
-                  group.style.display = selectedTags.includes(tag) ? 'block' : 'none';
-                });
-              }
-            });
-          });
-          
-          // Try panel endpoint functionality
-          function loadEndpointInTryPanel(endpoint) {
-            const tryPanelEndpoint = document.getElementById('try-panel-endpoint');
-            const tryPanelPlaceholder = document.getElementById('try-panel-placeholder');
-            
-            if (!tryPanelEndpoint || !tryPanelPlaceholder) return;
-            
-            // Show endpoint section, hide placeholder
-            tryPanelEndpoint.style.display = 'block';
-            tryPanelPlaceholder.style.display = 'none';
-            
-            // Populate endpoint details
-            document.getElementById('try-method').textContent = endpoint.method;
-            document.getElementById('try-method').className = 'method-badge method-' + endpoint.method.toLowerCase();
-            document.getElementById('try-path').textContent = endpoint.path;
-            document.getElementById('try-summary').textContent = endpoint.summary || '';
-            
-            // Show/hide sections based on endpoint
-            const parametersSection = document.getElementById('try-parameters');
-            const bodySection = document.getElementById('try-body');
-            
-            if (endpoint.parameters && endpoint.parameters.length > 0) {
-              parametersSection.style.display = 'block';
-              populateParameters(endpoint.parameters);
-            } else {
-              parametersSection.style.display = 'none';
-            }
-            
-            if (['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {
-              bodySection.style.display = 'block';
-            } else {
-              bodySection.style.display = 'none';
-            }
-            
-            // Clear previous response
-            document.getElementById('try-response').style.display = 'none';
-            
-            // Expand try panel if collapsed
-            if (tryPanel && tryPanel.classList.contains('collapsed')) {
-              tryPanel.classList.remove('collapsed');
-              const icon = tryPanelToggle?.querySelector('.try-panel-toggle-icon');
-              if (icon) icon.textContent = '◀';
-            }
-          }
-          
-          function populateParameters(parameters) {
-            const parametersList = document.getElementById('try-parameters-list');
-            if (!parametersList) return;
-            
-            parametersList.innerHTML = parameters.map(param => \`
-              <div class="parameter-item">
-                <label class="block text-sm font-medium mb-1">
-                  \${param.name} 
-                  <span class="text-xs text-gray-500">(\${param.in})</span>
-                  \${param.required ? '<span class="text-red-500">*</span>' : ''}
-                </label>
-                <input 
-                  type="text" 
-                  class="w-full px-2 py-1 border rounded text-sm"
-                  placeholder="Enter \${param.name}"
-                  data-param-name="\${param.name}"
-                  data-param-in="\${param.in}"
-                  data-param-required="\${param.required}"
-                />
-                \${param.description ? \`<p class="text-xs text-gray-500 mt-1">\${param.description}</p>\` : ''}
-              </div>
-            \`).join('');
-          }
-          
-          // Send request functionality
-          const sendRequestBtn = document.getElementById('send-request');
-          if (sendRequestBtn) {
-            sendRequestBtn.addEventListener('click', async function() {
-              const method = document.getElementById('try-method')?.textContent;
-              const path = document.getElementById('try-path')?.textContent;
-              
-              if (!method || !path) return;
-              
-              // Collect headers
-              const headers = { 'Content-Type': 'application/json' };
-              
-              // Add environment headers
-              if (window.zedocEnvironment && window.zedocEnvironment.headers) {
-                Object.assign(headers, window.zedocEnvironment.headers);
-              }
-              
-              // Add custom headers
-              const headerInputs = document.querySelectorAll('#try-headers-list .header-item');
-              headerInputs.forEach(item => {
-                const nameInput = item.querySelector('input[placeholder="Header name"]');
-                const valueInput = item.querySelector('input[placeholder="Header value"]');
-                if (nameInput?.value && valueInput?.value) {
-                  headers[nameInput.value] = valueInput.value;
-                }
-              });
-              
-              // Collect parameters
-              const params = new URLSearchParams();
-              const paramInputs = document.querySelectorAll('[data-param-name]');
-              paramInputs.forEach(input => {
-                if (input.value && input.dataset.paramIn === 'query') {
-                  params.append(input.dataset.paramName, input.value);
-                }
-              });
-              
-              // Build URL
-              let url = path;
-              if (params.toString()) {
-                url += '?' + params.toString();
-              }
-              
-              // Collect body
-              let body = null;
-              if (['POST', 'PUT', 'PATCH'].includes(method)) {
-                const bodyContent = document.getElementById('try-body-content')?.value;
-                if (bodyContent) {
-                  try {
-                    body = JSON.stringify(JSON.parse(bodyContent));
-                  } catch (e) {
-                    body = bodyContent;
-                  }
-                }
-              }
-              
-              // Show loading state
-              sendRequestBtn.textContent = 'Sending...';
-              sendRequestBtn.disabled = true;
-              
-              try {
-                const response = await fetch(url, {
-                  method,
-                  headers,
-                  body
-                });
-                
-                // Show response
-                displayResponse(response);
-                
-              } catch (error) {
-                displayError(error);
-              } finally {
-                sendRequestBtn.textContent = 'Send Request';
-                sendRequestBtn.disabled = false;
-              }
-            });
-          }
-          
-          async function displayResponse(response) {
-            const responseSection = document.getElementById('try-response');
-            const statusEl = document.getElementById('response-status');
-            const headersEl = document.getElementById('response-headers-content');
-            const bodyEl = document.getElementById('response-body-content');
-            
-            if (!responseSection) return;
-            
-            responseSection.style.display = 'block';
-            
-            // Status
-            const statusClass = response.ok ? 'text-green-600' : 'text-red-600';
-            statusEl.innerHTML = \`<span class="\${statusClass} font-mono">\${response.status} \${response.statusText}</span>\`;
-            
-            // Headers
-            const responseHeaders = {};
-            response.headers.forEach((value, key) => {
-              responseHeaders[key] = value;
-            });
-            headersEl.textContent = JSON.stringify(responseHeaders, null, 2);
-            document.getElementById('response-headers').style.display = 'block';
-            
-            // Body
-            try {
-              const text = await response.text();
-              let formattedBody = text;
-              
-              try {
-                const json = JSON.parse(text);
-                formattedBody = JSON.stringify(json, null, 2);
-              } catch (e) {
-                // Not JSON, use as is
-              }
-              
-              bodyEl.textContent = formattedBody;
-            } catch (error) {
-              bodyEl.textContent = 'Error reading response body: ' + error.message;
-            }
-          }
-          
-          function displayError(error) {
-            const responseSection = document.getElementById('try-response');
-            const statusEl = document.getElementById('response-status');
-            const bodyEl = document.getElementById('response-body-content');
-            
-            if (!responseSection) return;
-            
-            responseSection.style.display = 'block';
-            statusEl.innerHTML = '<span class="text-red-600 font-mono">Error</span>';
-            bodyEl.textContent = error.message;
-            document.getElementById('response-headers').style.display = 'none';
-          }
-          
-          // Clear try panel
-          const clearBtn = document.getElementById('clear-try-panel');
-          if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
-              // Clear all inputs
-              document.querySelectorAll('#try-panel input, #try-panel textarea').forEach(input => {
-                if (!input.dataset.variableName) { // Don't clear environment variables
-                  input.value = '';
-                }
-              });
-              
-              // Hide response
-              document.getElementById('try-response').style.display = 'none';
-            });
-          }
-          
-          // Add header functionality
-          const addHeaderBtn = document.getElementById('add-header');
-          if (addHeaderBtn) {
-            addHeaderBtn.addEventListener('click', function() {
-              const headersList = document.getElementById('try-headers-list');
-              const newHeader = document.createElement('div');
-              newHeader.className = 'header-item flex gap-2';
-              newHeader.innerHTML = \`
-                <input type="text" placeholder="Header name" class="flex-1 px-2 py-1 border rounded text-sm">
-                <input type="text" placeholder="Header value" class="flex-1 px-2 py-1 border rounded text-sm">
-                <button class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600">×</button>
-              \`;
-              
-              // Add remove functionality
-              newHeader.querySelector('button').addEventListener('click', function() {
-                newHeader.remove();
-              });
-              
-              headersList.appendChild(newHeader);
-            });
-          }
-          
-          // Remove header functionality for existing headers
-          document.querySelectorAll('#try-headers-list .header-item button').forEach(btn => {
-            btn.addEventListener('click', function() {
-              btn.closest('.header-item').remove();
-            });
-          });
-          
-          // Smooth scrolling for endpoint links
-          const endpointLinks = document.querySelectorAll('.endpoint-link');
-          endpointLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              const targetId = this.getAttribute('href').substring(1);
-              const targetElement = document.getElementById(targetId);
-              
-              if (targetElement) {
-                targetElement.scrollIntoView({ 
-                  behavior: 'smooth',
-                  block: 'start'
-                });
-                
-                // Highlight the target endpoint
-                targetElement.classList.add('highlighted');
-                setTimeout(() => {
-                  targetElement.classList.remove('highlighted');
-                }, 2000);
-                
-                // Load endpoint in try panel
-                const endpoint = {
-                  method: this.dataset.method,
-                  path: this.dataset.path,
-                  summary: this.querySelector('.endpoint-summary')?.textContent || '',
-                  parameters: [] // TODO: Extract from endpoint data
-                };
-                loadEndpointInTryPanel(endpoint);
-              }
-            });
-          });
-          
-          // Auto-hide sidebar on mobile when clicking endpoint
-          if (window.innerWidth <= 768) {
-            endpointLinks.forEach(link => {
-              link.addEventListener('click', function() {
-                if (sidebar && !sidebar.classList.contains('collapsed')) {
-                  sidebar.classList.add('collapsed');
-                  if (mainContent) {
-                    mainContent.classList.add('sidebar-collapsed');
-                  }
-                }
-              });
-            });
-          }
-        })();
-      </script>
+      ${enhancedJS}
     `;
   }
 
   /**
    * Generate unique endpoint ID
    */
-  private generateEndpointId(endpoint: EndpointInfo): string {
+  private generateEndpointId(endpoint: Endpoint): string {
     return `${endpoint.method.toLowerCase()}-${endpoint.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
+  }
+
+  /**
+   * Generate clean structured navigation HTML (sections and modules only)
+   */
+  generateCleanNavigationHTML(sections: any[], brandingConfig?: BrandingConfig): string {
+    const sidebarLogo = this.brandingService.generateSidebarLogoHTML(brandingConfig);
+    
+    let sectionsHTML = '';
+    sections.forEach(section => {
+      sectionsHTML += `
+        <div class="nav-section">
+          <div class="nav-title">${section.name}</div>
+      `;
+      
+      section.modules.forEach(module => {
+        const moduleTitle = module.name || 'Module';
+        const endpointCount = module.endpoints ? module.endpoints.length : 0;
+        
+        sectionsHTML += `
+          <a href="#module-${section.id}-${module.id}" class="nav-item">
+            <span class="module-name">${moduleTitle}</span>
+            <span class="endpoint-count">${endpointCount} endpoint${endpointCount !== 1 ? 's' : ''}</span>
+          </a>
+        `;
+      });
+      
+      sectionsHTML += `
+        </div>
+      `;
+    });
+
+    return `
+      <nav class="sidebar">
+        <div class="sidebar-header">
+          <div class="header-top">
+            <div class="logo">
+              ${brandingConfig?.logo ? this.brandingService.generateHeaderLogoHTML(brandingConfig) : 'API Documentation'}
+            </div>
+            <button class="theme-toggle">🌙</button>
+          </div>
+          <div class="subtitle">Navigate through modules</div>
+        </div>
+        
+        <div class="sidebar-content">
+          ${sectionsHTML}
+        </div>
+      </nav>
+    `;
   }
 } 

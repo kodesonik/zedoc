@@ -3,98 +3,1158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{title}} - API Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        {{{themeCSS}}}
+        {{{fontCSS}}}
+        {{{sidebarCSS}}}
+        {{{brandingCSS}}}
+        
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Scroll offset for fixed headers */
+        [id] {
+            scroll-margin-top: 2rem;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <header class="mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">{{title}}</h1>
-            {{#if description}}
-            <p class="text-gray-600 text-lg">{{description}}</p>
-            {{/if}}
-            {{#if version}}
-            <span class="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded mt-2">Version {{version}}</span>
-            {{/if}}
-        </header>
-
-        <div class="space-y-6">
-            {{#each endpoints}}
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex items-center mb-4">
-                    <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full 
-                        {{#eq method 'GET'}}bg-green-100 text-green-800{{/eq}}
-                        {{#eq method 'POST'}}bg-blue-100 text-blue-800{{/eq}}
-                        {{#eq method 'PUT'}}bg-yellow-100 text-yellow-800{{/eq}}
-                        {{#eq method 'DELETE'}}bg-red-100 text-red-800{{/eq}}
-                        {{#eq method 'PATCH'}}bg-purple-100 text-purple-800{{/eq}}">
-                        {{method}}
-                    </span>
-                    <code class="ml-3 text-lg font-mono text-gray-800">{{path}}</code>
-                </div>
-                
-                {{#if summary}}
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">{{summary}}</h3>
-                {{/if}}
-                
-                {{#if description}}
-                <p class="text-gray-600 mb-4">{{description}}</p>
-                {{/if}}
-
-                {{#if tags}}
-                <div class="mb-4">
-                    {{#each tags}}
-                    <span class="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded mr-2">{{this}}</span>
-                    {{/each}}
-                </div>
-                {{/if}}
-
-                {{#if parameters}}
-                <div class="mb-4">
-                    <h4 class="font-semibold text-gray-800 mb-2">Parameters</h4>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-gray-50 rounded">
-                            <thead>
-                                <tr class="bg-gray-200">
-                                    <th class="px-4 py-2 text-left">Name</th>
-                                    <th class="px-4 py-2 text-left">Type</th>
-                                    <th class="px-4 py-2 text-left">In</th>
-                                    <th class="px-4 py-2 text-left">Required</th>
-                                    <th class="px-4 py-2 text-left">Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each parameters}}
-                                <tr>
-                                    <td class="px-4 py-2 font-mono">{{name}}</td>
-                                    <td class="px-4 py-2">{{type}}</td>
-                                    <td class="px-4 py-2">{{in}}</td>
-                                    <td class="px-4 py-2">{{#if required}}Yes{{else}}No{{/if}}</td>
-                                    <td class="px-4 py-2">{{description}}</td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
+<body class="light">
+    <button class="mobile-menu-btn">☰</button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="header-top">
+                    <div class="logo">
+                        {{#if branding.logo}}
+                            {{{headerLogoHTML}}}
+                        {{else}}
+                            {{title}}
+                        {{/if}}
+                    </div>
+                    <div class="header-controls">
+                        {{!-- <button class="expand-all-btn" title="Expand all sections">⊞</button> --}}
+                        {{!-- {{#if branding.theme.mode === 'dark'}} --}}
+                            <button class="theme-toggle">🌙</button>
+                        {{!-- {{else}}
+                            <button class="theme-toggle">🌞</button>
+                        {{/if}} --}}
                     </div>
                 </div>
-                {{/if}}
-
-                {{#if responses}}
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-2">Responses</h4>
-                    <div class="space-y-2">
-                        {{#each responses}}
-                        <div class="flex items-start">
-                            <span class="inline-block px-2 py-1 text-sm font-mono bg-gray-100 text-gray-800 rounded mr-3">{{statusCode}}</span>
-                            <span class="text-gray-700">{{description}}</span>
-                        </div>
+                <div class="header-bottom">
+                    <div class="subtitle">API Documentation</div>
+                    <div class="version">Version: {{version}}</div>
+                </div>
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search modules and endpoints..." />
+                <div class="role-filter">
+                    <label class="role-filter-label">Filter by role:</label>
+                    <div class="role-buttons">
+                        <button class="role-btn active" data-role="all">All</button>
+                        {{#each roles}}
+                        <button class="role-btn" data-role="{{this}}">{{this}}</button>
                         {{/each}}
                     </div>
                 </div>
+            </div>
+
+            <!-- Navigation Sections -->
+            {{#if sections}}
+                {{#each sections}}
+                <div class="nav-section" data-section="{{id}}">
+                    <div class="nav-title collapsible" data-target="#{{sectionId id}}" role="button" tabindex="0" aria-expanded="false" aria-controls="modules-{{id}}">
+                        <span class="section-name">{{name}}</span>
+                        <span class="collapse-icon" aria-hidden="true">▶</span>
+                    </div>
+                    <div class="nav-modules collapsed" id="modules-{{id}}" role="group" aria-labelledby="section-{{id}}">
+                        {{#each modules}}
+                        <a href="#{{moduleId ../id id}}" class="nav-item">
+                            <span class="module-name">{{name}}</span>
+                        </a>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/each}}
+            {{else}}
+                <!-- Fallback for non-structured mode -->
+                <div class="nav-section">
+                    <div class="nav-title">Endpoints</div>
+                    <div class="nav-modules">
+                        {{#each endpoints}}
+                        <a href="#{{endpointId this}}" class="nav-item">{{method}} {{path}}</a>
+                        {{/each}}
+                    </div>
+                </div>
+            {{/if}}
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">{{title}} API</h1>
+                {{#if description}}
+                <p class="page-description">{{description}}</p>
                 {{/if}}
             </div>
-            {{/each}}
+
+            <!-- Getting Started Section -->
+            <section id="getting-started" class="getting-started-section">
+                <h2 class="getting-started-title">Getting Started</h2>
+                
+                <!-- Theme Preset Selector -->
+                <div class="preset-selector">
+                    <label class="preset-selector-label" for="themePresetSelect">Choose Documentation Theme</label>
+                    <select class="preset-select" id="themePresetSelect">
+                        <option value="default">📚 Default (Solarized Book)</option>
+                        <option value="postman">🚀 Postman (Professional Orange)</option>
+                        <option value="insomnia">💜 Insomnia (Minimal Purple)</option>
+                        <option value="swagger">⚙️ Swagger (Technical Green)</option>
+                    </select>
+                    <div class="preset-description">
+                        Select a visual theme that matches your workflow. The page will reload to apply the new theme.
+                    </div>
+                </div>
+                
+                <div class="config-group">
+                    <label class="config-label">Base URL</label>
+                    <div class="config-input">{{baseUrl}}</div>
+                </div>
+
+                <div class="config-group">
+                    <label class="config-label">Content Type</label>
+                    <div class="config-input">application/json</div>
+                </div>
+
+                {{#if version}}
+                <div class="config-group">
+                    <label class="config-label">API Version</label>
+                    <div class="api-version-display">{{version}}</div>
+                </div>
+                {{/if}}
+
+                <div class="action-buttons">
+                    <button class="action-button apply-button">Apply Changes</button>
+                    <button class="action-button clear-button">Reset</button>
+                </div>
+            </section>
+
+            <!-- Environment Configuration Section -->
+            <section id="environment-config" class="environment-config-section">
+                <h2 class="environment-config-title">Environment Configuration</h2>
+                <p class="environment-config-description">
+                    Define environment variables for your API requests. These variables will be available across all endpoints and can be used in headers and request bodies.
+                </p>
+                
+                <div class="environment-variables-container">
+                    <div class="environment-variables-header">
+                        <h3 class="environment-variables-title">Environment Variables</h3>
+                        <button type="button" class="add-env-var-btn" id="addEnvVarBtn">
+                            <span class="btn-icon">+</span>
+                            <span class="btn-text">Add Variable</span>
+                        </button>
+                    </div>
+                    
+                    <div class="environment-variables-table-container">
+                        <table class="environment-variables-table" id="environmentVariablesTable">
+                            <thead>
+                                <tr>
+                                    <th class="env-var-name-header">Variable Name</th>
+                                    <th class="env-var-value-header">Value</th>
+                                    <th class="env-var-description-header">Description (Optional)</th>
+                                    <th class="env-var-actions-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="environmentVariablesList">
+                                <!-- Dynamic environment variables will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="environment-variables-empty" id="environmentVariablesEmpty">
+                        <div class="empty-state">
+                            <div class="empty-icon">🌍</div>
+                            <div class="empty-title">No Environment Variables</div>
+                            <div class="empty-description">Click "Add Variable" to create your first environment variable</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="environment-actions">
+                    <button class="action-button apply-button" id="saveEnvVarsBtn">Save Variables</button>
+                    <button class="action-button clear-button" id="clearEnvVarsBtn">Clear All</button>
+                    <button class="action-button export-button" id="exportEnvVarsBtn">Export JSON</button>
+                    <button class="action-button import-button" id="importEnvVarsBtn">Import JSON</button>
+                </div>
+            </section>
+
+            <!-- Structured Mode: Sections and Modules -->
+            {{#if sections}}
+                {{#each sections}}
+                <section id="{{sectionId id}}" class="section">
+                    <h2 class="section-title">{{name}}</h2>
+                    {{#if description}}
+                    <p class="section-description">{{description}}</p>
+                    {{/if}}
+                    
+                    {{#each modules}}
+                    <section id="{{moduleId ../id id}}" class="module-section">
+                        <h3 class="module-title">{{name}}</h3>
+                        {{#if description}}
+                        <p class="module-description">{{description}}</p>
+                        {{/if}}
+                        
+                        {{#each endpoints}}
+                        <div id="{{structuredEndpointId ../../id ../id this}}" class="endpoint-card" data-tags="{{formatTags tags}}">
+                            <div class="endpoint-header">
+                                <span class="method-badge method-{{lowercase method}}">{{method}}</span>
+                                <span class="endpoint-path">{{path}}</span>
+                                <span class="endpoint-summary">{{summary}}</span>
+                                <button class="try-button" data-method="{{method}}" data-path="{{path}}" data-endpoint-id="{{structuredEndpointId ../../id ../id this}}">Try</button>
+                            </div>
+                            <div class="endpoint-details">
+                                {{#if description}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Description</h4>
+                                    <p>{{description}}</p>
+                                </div>
+                                {{/if}}
+                                
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Authentication</h4>
+                                    {{#if requiresAuth}}
+                                    <p>🔒 Authentication Required</p>
+                                    {{else}}
+                                    <p>🌐 Public Endpoint</p>
+                                    {{/if}}
+                                </div>
+                                
+                                {{#if roles}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Roles</h4>
+                                    <p>{{formatRoles roles}}</p>
+                                </div>
+                                {{/if}}
+                                
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Request URL</h4>
+                                    <div class="code-block">{{method}} {{../../../baseUrl}}{{path}}</div>
+                                </div>
+                                
+                                {{#if parameters}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Parameters</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="params-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>In</th>
+                                                    <th>Description</th>
+                                                    <th>Example</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {{#each parameters}}
+                                                <tr>
+                                                    <td class="param-name">
+                                                        {{name}}{{#if required}}<span class="required-asterisk">*</span>{{/if}}
+                                                    </td>
+                                                    <td class="param-type">{{type}}</td>
+                                                    <td class="param-in">{{in}}</td>
+                                                    <td class="param-description">{{description}}</td>
+                                                    <td class="param-example">
+                                                        {{#if example}}
+                                                        <code>{{example}}</code>
+                                                        {{else}}
+                                                        <span class="no-example">-</span>
+                                                        {{/if}}
+                                                    </td>
+                                                </tr>
+                                                {{/each}}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {{/if}}
+                                
+                                {{#if requestHeaders}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Request Headers</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="params-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>Description</th>
+                                                    <th>Example</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {{#each requestHeaders}}
+                                                <tr>
+                                                    <td class="param-name">
+                                                        {{name}}{{#if required}}<span class="required-asterisk">*</span>{{/if}}
+                                                    </td>
+                                                    <td class="param-type">{{type}}</td>
+                                                    <td class="param-description">{{description}}</td>
+                                                    <td class="param-example">
+                                                        {{#if example}}
+                                                        <code>{{example}}</code>
+                                                        {{else}}
+                                                        <span class="no-example">-</span>
+                                                        {{/if}}
+                                                    </td>
+                                                </tr>
+                                                {{/each}}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {{/if}}
+                                
+                                {{#if requestBody}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Request Body</h4>
+                                    <div class="code-block json-code">
+                                        <pre><code class="language-json">{{json requestBody}}</code></pre>
+                                    </div>
+                                </div>
+                                {{/if}}
+{{!--                                 
+                                {{#if requestExamples}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Request Examples</h4>
+                                    {{#each requestExamples}}
+                                    <div class="code-block json-code">
+                                        <pre><code class="language-json">{{json this}}</code></pre>
+                                    </div>
+                                    {{/each}}
+                                </div>
+                                {{/if}} --}}
+                                
+                                {{#if successResponse}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">✅ Success Response</h4>
+                                    <div class="code-block json-code">
+                                        <pre><code class="language-json">{{json successResponse}}</code></pre>
+                                    </div>
+                                </div>
+                                {{/if}}
+                                
+                                {{#if responseExamples}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">Response Examples</h4>
+                                    {{#each responseExamples}}
+                                    <div class="code-block json-code">
+                                        <pre><code class="language-json">{{json this}}</code></pre>
+                                    </div>
+                                    {{/each}}
+                                </div>
+                                {{/if}}
+                                
+                                {{#if errorResponses}}
+                                <div class="detail-section">
+                                    <h4 class="detail-title">❌ Error Responses</h4>
+                                    {{#each errorResponses}}
+                                    <div class="error-response">
+                                        <h5 class="error-status">{{status}} - {{description}}</h5>
+                                        <div class="code-block json-code">
+                                            <pre><code class="language-json">{{json this}}</code></pre>
+                                        </div>
+                                    </div>
+                                    {{/each}}
+                                </div>
+                                {{/if}}
+                            </div>
+                        </div>
+                        {{/each}}
+                    </section>
+                    {{/each}}
+                </section>
+                {{/each}}
+            {{else}}
+                <!-- Fallback: Traditional Swagger Mode -->
+                {{#each endpoints}}
+                <section id="{{endpointId this}}" class="module-section">
+                    <div class="endpoint-card" data-tags="{{formatTags tags}}">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-{{lowercase method}}">{{method}}</span>
+                            <span class="endpoint-path">{{path}}</span>
+                            <span class="endpoint-summary">{{summary}}</span>
+                            <button class="try-button" data-method="{{method}}" data-path="{{path}}" data-endpoint-id="{{endpointId this}}">Try</button>
+                        </div>
+                        <div class="endpoint-details">
+                            {{#if description}}
+                            <div class="detail-section">
+                                <h4 class="detail-title">Description</h4>
+                                <p>{{description}}</p>
+                            </div>
+                            {{/if}}
+                            
+                            {{#if tags}}
+                            <div class="detail-section">
+                                <h4 class="detail-title">Tags</h4>
+                                <p>{{formatTags tags}}</p>
+                            </div>
+                            {{/if}}
+                            
+                            {{#if parameters}}
+                            <div class="detail-section">
+                                <h4 class="detail-title">Parameters</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Type</th>
+                                                <th>In</th>
+                                                <th>Description</th>
+                                                <th>Example</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {{#each parameters}}
+                                            <tr>
+                                                <td class="param-name">
+                                                    {{name}}{{#if required}}<span class="required-asterisk">*</span>{{/if}}
+                                                </td>
+                                                <td class="param-type">{{type}}</td>
+                                                <td class="param-in">{{in}}</td>
+                                                <td class="param-description">{{description}}</td>
+                                                <td class="param-example">
+                                                    {{#if example}}
+                                                    <code>{{example}}</code>
+                                                    {{else}}
+                                                    <span class="no-example">-</span>
+                                                    {{/if}}
+                                                </td>
+                                            </tr>
+                                            {{/each}}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {{/if}}
+                            
+                            {{#if responses}}
+                            <div class="detail-section">
+                                <h4 class="detail-title">Responses</h4>
+                                {{#each responses}}
+                                <div class="response-item">
+                                    <span class="response-status">{{statusCode}}</span>
+                                    <span class="response-description">{{description}}</span>
+                                </div>
+                                {{/each}}
+                            </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </section>
+                {{/each}}
+            {{/if}}
+        </main>
+    </div>
+
+    <!-- API Testing Side Panel -->
+    <div class="api-panel" id="apiPanel">
+        <div class="api-panel-header">
+            <div class="api-panel-title-section">
+                <h3 class="api-panel-title">API Testing</h3>
+                <div class="api-panel-subtitle" id="apiPanelSubtitle">Select an endpoint to test</div>
+            </div>
+            <button class="close-panel-btn" id="closePanelBtn">✕</button>
+        </div>
+        
+        <div class="api-panel-content">
+            <!-- Request Section -->
+            <div class="request-section">
+                <h4 class="section-title">Request</h4>
+                
+                <div class="request-url-section">
+                    <label class="input-label">Method & URL</label>
+                    <div class="url-input-group">
+                        <select class="method-select" id="requestMethod">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="PATCH">PATCH</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" class="url-input" id="requestUrl" placeholder="Enter request URL">
+                    </div>
+                </div>
+                
+                <div class="headers-section">
+                    <label class="input-label">Headers</label>
+                    <div class="headers-form" id="headersForm">
+                        <!-- Headers will be dynamically populated here -->
+                    </div>
+                    <button type="button" class="add-header-btn" id="addHeaderBtn">+ Add Header</button>
+                </div>
+                
+                <div class="query-section" id="querySection" style="display: none;">
+                    <label class="input-label">Parameters</label>
+                    <div class="query-form" id="queryForm">
+                        <!-- Query parameters will be dynamically populated here -->
+                    </div>
+                    <button type="button" class="add-query-btn" id="addQueryBtn">+ Add Parameter</button>
+                </div>
+                
+                <div class="body-section">
+                    <label class="input-label">Request Body</label>
+                    <textarea class="body-textarea" id="requestBody" placeholder='{"key": "value"}'></textarea>
+                </div>
+                
+                <button class="send-button" id="sendRequestBtn">Send Request</button>
+            </div>
+            
+            <!-- Response Section -->
+            <div class="response-section">
+                <div class="response-header">
+                    <h4 class="section-title">Response</h4>
+                    <button class="export-button" id="exportResponseBtn" disabled>Export JSON</button>
+                </div>
+                
+                <div class="response-status">
+                    <label class="input-label">Status Code</label>
+                    <div class="status-display" id="responseStatus">-</div>
+                </div>
+                
+                <div class="response-headers">
+                    <label class="input-label">Response Headers</label>
+                    <textarea class="response-textarea" id="responseHeaders" readonly placeholder="Response headers will appear here..."></textarea>
+                </div>
+                
+                <div class="response-body">
+                    <label class="input-label">Response Body</label>
+                    <textarea class="response-textarea" id="responseBody" readonly placeholder="Response body will appear here..."></textarea>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        // Inline JavaScript from services
+        {{{sidebarJS}}}
+        {{{environmentJS}}}
+    </script>
+    <!-- Import the main docs.js file with all interactive functionality -->
+    <script>
+        // Load docs.js from assets
+        const script = document.createElement('script');
+        script.src = './assets/docs.js';
+        script.onload = function() {
+            console.log('📄 Documentation interactive features loaded');
+        };
+        script.onerror = function() {
+            console.warn('⚠️ Could not load docs.js - some interactive features may not work');
+        };
+        document.head.appendChild(script);
+        
+        // Initialize theme from URL parameter or localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for theme parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const themeParam = urlParams.get('theme');
+            const presetParam = urlParams.get('preset');
+            
+            if (themeParam && (themeParam === 'light' || themeParam === 'dark')) {
+                // Apply theme from URL parameter
+                document.body.className = themeParam;
+                
+                // Save to localStorage
+                localStorage.setItem('api-docs-theme', themeParam);
+                console.log(`🎨 Theme set from URL parameter: ${themeParam}`);
+            } else {
+                // Use server-side theme or default from localStorage
+                const savedTheme = localStorage.getItem('api-docs-theme');
+                const defaultTheme = '{{theme.mode}}' || 'light';
+                const currentTheme = savedTheme || defaultTheme;
+                
+                document.body.className = currentTheme;
+                console.log(`🎨 Theme initialized: ${currentTheme}`);
+            }
+            
+            // Initialize preset selector
+            initializePresetSelector();
+            
+            // Initialize environment variables
+            initializeEnvironmentVariables();
+            
+            // Update theme toggle icon
+            updateThemeToggleIcon();
+        });
+        
+        // Initialize preset selector functionality
+        function initializePresetSelector() {
+            const presetSelect = document.getElementById('themePresetSelect');
+            if (!presetSelect) return;
+            
+            // Get current preset from URL parameter or default to 'default'
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentPreset = urlParams.get('preset') || 'default';
+            
+            // Set the current preset as selected
+            presetSelect.value = currentPreset;
+            
+            // Add change event listener
+            presetSelect.addEventListener('change', function() {
+                const selectedPreset = this.value;
+                
+                // Get current URL and update/add preset parameter
+                const url = new URL(window.location);
+                url.searchParams.set('preset', selectedPreset);
+                
+                // Show loading state
+                this.disabled = true;
+                const originalText = this.options[this.selectedIndex].text;
+                this.options[this.selectedIndex].text = '🔄 Loading...';
+                
+                // Reload page with new preset
+                setTimeout(() => {
+                    window.location.href = url.toString();
+                }, 500);
+                
+                console.log(`🎨 Switching to preset: ${selectedPreset}`);
+            });
+            
+            // Update preset description based on current selection
+            updatePresetDescription(currentPreset);
+            
+            console.log(`🎨 Preset selector initialized with: ${currentPreset}`);
+        }
+        
+        // Update preset description
+        function updatePresetDescription(preset) {
+            const descriptions = {
+                'default': 'Classic book-inspired design with warm solarized colors and elegant typography. Perfect for comprehensive documentation.',
+                'postman': 'Modern professional interface with bold orange accents and glass-morphism effects. Ideal for API testing workflows.',
+                'insomnia': 'Ultra-minimal clean design with subtle purple highlights. Great for distraction-free documentation reading.',
+                'swagger': 'Technical developer-focused theme with structured green colors and monospace fonts. Perfect for API specification review.'
+            };
+            
+            const descriptionElement = document.querySelector('.preset-description');
+            if (descriptionElement && descriptions[preset]) {
+                descriptionElement.textContent = descriptions[preset];
+            }
+        }
+        
+        // Function to update theme toggle icon
+        function updateThemeToggleIcon() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (themeToggle) {
+                const currentTheme = document.body.className;
+                const icon = currentTheme === 'light' ? '🌙' : '☀️';
+                const title = currentTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+                
+                themeToggle.innerHTML = icon;
+                themeToggle.title = title;
+            }
+        }
+        
+        // Manual theme toggle function (fallback if docs.js doesn't load)
+        function toggleTheme() {
+            const currentTheme = document.body.className;
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.body.className = newTheme;
+            localStorage.setItem('api-docs-theme', newTheme);
+            updateThemeToggleIcon();
+            
+            console.log(`🎨 Theme toggled to: ${newTheme}`);
+        }
+        
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCollapsibleNavigation();
+            initializeNavigationScrollSpy();
+        });
+        
+        function initializeCollapsibleNavigation() {
+            // Handle expand/collapse all button
+            const expandAllBtn = document.querySelector('.expand-all-btn');
+            let allExpanded = false;
+            
+            if (expandAllBtn) {
+                expandAllBtn.addEventListener('click', function() {
+                    const sections = document.querySelectorAll('.nav-title.collapsible');
+                    const modules = document.querySelectorAll('.nav-modules');
+                    
+                    allExpanded = !allExpanded;
+                    
+                    sections.forEach((title, index) => {
+                        const moduleElement = modules[index];
+                        if (allExpanded) {
+                            moduleElement.classList.remove('collapsed');
+                            title.classList.remove('collapsed');
+                            title.setAttribute('aria-expanded', 'true');
+                        } else {
+                            moduleElement.classList.add('collapsed');
+                            title.classList.add('collapsed');
+                            title.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                    
+                    // Update button text and title
+                    this.innerHTML = allExpanded ? '⊟' : '⊞';
+                    this.title = allExpanded ? 'Collapse all sections' : 'Expand all sections';
+                    
+                    console.log(`📁 ${allExpanded ? 'Expanded' : 'Collapsed'} all sections`);
+                });
+            }
+            
+            // Handle section title clicks for collapsing/expanding and scrolling
+            document.querySelectorAll('.nav-title.collapsible').forEach(title => {
+                title.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const modules = this.nextElementSibling;
+                    const isCollapsed = modules.classList.contains('collapsed');
+                    const targetId = this.getAttribute('data-target');
+                    
+                    // Toggle collapse state
+                    if (isCollapsed) {
+                        modules.classList.remove('collapsed');
+                        this.classList.remove('collapsed');
+                        this.setAttribute('aria-expanded', 'true');
+                    } else {
+                        modules.classList.add('collapsed');
+                        this.classList.add('collapsed');
+                        this.setAttribute('aria-expanded', 'false');
+                    }
+                    
+                    // Also scroll to the section
+                    if (targetId) {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            setTimeout(() => {
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }, isCollapsed ? 300 : 0); // Wait for expansion animation
+                        }
+                    }
+                    
+                    console.log(`📂 Section ${isCollapsed ? 'expanded' : 'collapsed'}: ${this.querySelector('.section-name').textContent}`);
+                });
+                
+                // Start with sections collapsed
+                const modules = title.nextElementSibling;
+                modules.classList.add('collapsed');
+                title.classList.add('collapsed');
+            });
+            
+            // Handle module link clicks
+            document.querySelectorAll('.nav-item[href^="#"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // Remove active class from all nav items
+                        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                        
+                        // Add active class to clicked item
+                        this.classList.add('active');
+                        
+                        // Scroll to target
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        console.log(`🎯 Navigating to module: ${targetId}`);
+                    }
+                });
+            });
+        }
+        
+        function initializeNavigationScrollSpy() {
+            const sectionTitles = document.querySelectorAll('.nav-title[data-target]');
+            const navItems = document.querySelectorAll('.nav-item[href^="#"]');
+            
+            function updateActiveNavigation() {
+                const scrollY = window.scrollY;
+                
+                // Check sections
+                sectionTitles.forEach(title => {
+                    const targetId = title.getAttribute('data-target').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        const rect = targetElement.getBoundingClientRect();
+                        const elementTop = scrollY + rect.top;
+                        const elementBottom = elementTop + rect.height;
+                        
+                        if (scrollY >= elementTop - 100 && scrollY < elementBottom + 100) {
+                            // Remove active from all section titles
+                            sectionTitles.forEach(t => t.classList.remove('active'));
+                            title.classList.add('active');
+                        }
+                    }
+                });
+                
+                // Check modules
+                navItems.forEach(item => {
+                    const targetId = item.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        const rect = targetElement.getBoundingClientRect();
+                        const elementTop = scrollY + rect.top;
+                        const elementBottom = elementTop + rect.height;
+                        
+                        if (scrollY >= elementTop - 100 && scrollY < elementBottom - 50) {
+                            // Remove active from all nav items
+                            navItems.forEach(i => i.classList.remove('active'));
+                            item.classList.add('active');
+                        }
+                    }
+                });
+            }
+            
+            // Throttled scroll listener
+            let ticking = false;
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    requestAnimationFrame(updateActiveNavigation);
+                    ticking = true;
+                }
+            });
+            
+            // Initialize on load
+            updateActiveNavigation();
+        }
+        
+        // Keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            // Only handle when focus is on navigation elements
+            if (!e.target.closest('.sidebar')) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    navigateWithArrowKeys(e.key === 'ArrowUp' ? -1 : 1);
+                    break;
+                case 'Enter':
+                case ' ':
+                    if (e.target.classList.contains('nav-title')) {
+                        e.preventDefault();
+                        e.target.click();
+                    }
+                    break;
+                case 'Escape':
+                    // Collapse all sections
+                    document.querySelectorAll('.nav-modules').forEach(module => {
+                        module.classList.add('collapsed');
+                    });
+                    document.querySelectorAll('.nav-title.collapsible').forEach(title => {
+                        title.classList.add('collapsed');
+                    });
+                    break;
+            }
+        });
+        
+        function navigateWithArrowKeys(direction) {
+            const focusableElements = document.querySelectorAll('.nav-title, .nav-item');
+            const currentIndex = Array.from(focusableElements).findIndex(el => el === document.activeElement);
+            
+            if (currentIndex !== -1) {
+                const nextIndex = Math.max(0, Math.min(focusableElements.length - 1, currentIndex + direction));
+                focusableElements[nextIndex].focus();
+            } else if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
+        }
+        
+        // Environment Variables Management
+        let environmentVariables = [];
+        
+        // Initialize environment variables functionality
+        function initializeEnvironmentVariables() {
+            loadEnvironmentVariables();
+            bindEnvironmentVariableEvents();
+            renderEnvironmentVariables();
+        }
+        
+        // Load environment variables from localStorage
+        function loadEnvironmentVariables() {
+            try {
+                const stored = localStorage.getItem('api-docs-env-vars');
+                if (stored) {
+                    environmentVariables = JSON.parse(stored);
+                } else {
+                    // Add some default examples
+                    environmentVariables = [
+                        { key: 'BASE_URL', value: '{{baseUrl}}', description: 'Base URL for all API endpoints' },
+                        { key: 'API_TOKEN', value: 'your-api-token-here', description: 'Authorization token for API requests' }
+                    ];
+                }
+            } catch (e) {
+                console.warn('Failed to load environment variables:', e);
+                environmentVariables = [];
+            }
+        }
+        
+        // Save environment variables to localStorage
+        function saveEnvironmentVariables() {
+            try {
+                localStorage.setItem('api-docs-env-vars', JSON.stringify(environmentVariables));
+                
+                // Sync with API tester if it exists
+                if (window.apiTesterManager) {
+                    window.apiTesterManager.refreshEnvironmentVariables();
+                }
+                
+                showNotification('Environment variables saved successfully!', 'success');
+            } catch (e) {
+                console.error('Failed to save environment variables:', e);
+                showNotification('Failed to save environment variables', 'error');
+            }
+        }
+        
+        // Bind event listeners for environment variables
+        function bindEnvironmentVariableEvents() {
+            // Add variable button
+            const addBtn = document.getElementById('addEnvVarBtn');
+            if (addBtn) {
+                addBtn.addEventListener('click', addEnvironmentVariable);
+            }
+            
+            // Save variables button
+            const saveBtn = document.getElementById('saveEnvVarsBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    collectEnvironmentVariables();
+                    saveEnvironmentVariables();
+                });
+            }
+            
+            // Clear all button
+            const clearBtn = document.getElementById('clearEnvVarsBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to clear all environment variables?')) {
+                        environmentVariables = [];
+                        renderEnvironmentVariables();
+                        saveEnvironmentVariables();
+                    }
+                });
+            }
+            
+            // Export button
+            const exportBtn = document.getElementById('exportEnvVarsBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', exportEnvironmentVariables);
+            }
+            
+            // Import button
+            const importBtn = document.getElementById('importEnvVarsBtn');
+            if (importBtn) {
+                importBtn.addEventListener('click', importEnvironmentVariables);
+            }
+        }
+        
+        // Add new environment variable
+        function addEnvironmentVariable() {
+            environmentVariables.push({
+                key: '',
+                value: '',
+                description: ''
+            });
+            renderEnvironmentVariables();
+        }
+        
+        // Remove environment variable
+        function removeEnvironmentVariable(index) {
+            if (confirm('Are you sure you want to remove this variable?')) {
+                environmentVariables.splice(index, 1);
+                renderEnvironmentVariables();
+            }
+        }
+        
+        // Collect environment variables from form inputs
+        function collectEnvironmentVariables() {
+            const container = document.getElementById('environmentVariablesList');
+            if (!container) return;
+            
+            const rows = container.querySelectorAll('.env-var-row');
+            environmentVariables = [];
+            
+            rows.forEach((row, index) => {
+                const keyInput = row.querySelector('.env-var-key');
+                const valueInput = row.querySelector('.env-var-value');
+                const descInput = row.querySelector('.env-var-description');
+                
+                if (keyInput && valueInput && descInput) {
+                    environmentVariables.push({
+                        key: keyInput.value.trim(),
+                        value: valueInput.value.trim(),
+                        description: descInput.value.trim()
+                    });
+                }
+            });
+        }
+        
+        // Render environment variables list
+        function renderEnvironmentVariables() {
+            const container = document.getElementById('environmentVariablesList');
+            const emptyState = document.getElementById('environmentVariablesEmpty');
+            const tableContainer = document.querySelector('.environment-variables-table-container');
+            
+            if (!container || !emptyState || !tableContainer) return;
+            
+            if (environmentVariables.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                tableContainer.style.display = 'none';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tableContainer.style.display = 'block';
+            
+            container.innerHTML = environmentVariables.map((envVar, index) => `
+                <tr class="env-var-row" data-index="${index}">
+                    <td class="env-var-name-cell">
+                        <input type="text" class="env-var-key env-table-input" value="${escapeHtml(envVar.key)}" placeholder="VARIABLE_NAME">
+                    </td>
+                    <td class="env-var-value-cell">
+                        <input type="text" class="env-var-value env-table-input" value="${escapeHtml(envVar.value)}" placeholder="variable-value">
+                    </td>
+                    <td class="env-var-description-cell">
+                        <input type="text" class="env-var-description env-table-input" value="${escapeHtml(envVar.description)}" placeholder="Description of this variable">
+                    </td>
+                    <td class="env-var-actions-cell">
+                        <button type="button" class="remove-env-var-btn" onclick="removeEnvironmentVariable(${index})" title="Remove Variable">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Export environment variables as JSON
+        function exportEnvironmentVariables() {
+            collectEnvironmentVariables();
+            const dataStr = JSON.stringify(environmentVariables, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'environment-variables.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Environment variables exported successfully!', 'success');
+        }
+        
+        // Import environment variables from JSON
+        function importEnvironmentVariables() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            environmentVariables = imported;
+                            renderEnvironmentVariables();
+                            saveEnvironmentVariables();
+                            showNotification('Environment variables imported successfully!', 'success');
+                        } else {
+                            throw new Error('Invalid format');
+                        }
+                    } catch (error) {
+                        showNotification('Failed to import environment variables. Please check the file format.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            });
+            
+            input.click();
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+                background-color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
 </body>
 </html> 
