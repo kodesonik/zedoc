@@ -856,6 +856,12 @@
         function saveEnvironmentVariables() {
             try {
                 localStorage.setItem('api-docs-env-vars', JSON.stringify(environmentVariables));
+                
+                // Sync with API tester if it exists
+                if (window.apiTesterManager) {
+                    window.apiTesterManager.refreshEnvironmentVariables();
+                }
+                
                 showNotification('Environment variables saved successfully!', 'success');
             } catch (e) {
                 console.error('Failed to save environment variables:', e);

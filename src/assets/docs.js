@@ -567,6 +567,9 @@ function initializeApp() {
   const clipboardManager = new ClipboardManager();
   const apiTesterManager = new ApiTesterManager(stateManager);
   
+  // Make API tester manager globally available for environment variable sync
+  window.apiTesterManager = apiTesterManager;
+  
   console.log('📄 All documentation features initialized successfully');
 }
 
@@ -576,6 +579,7 @@ class ApiTesterManager {
     this.stateManager = stateManager;
     this.panel = null;
     this.currentEndpoint = null;
+    this.environmentVariables = [];
     this.init();
   }
 
@@ -583,6 +587,24 @@ class ApiTesterManager {
     this.panel = document.getElementById('apiPanel');
     this.bindEvents();
     this.restorePanelState();
+    this.loadEnvironmentVariables();
+  }
+
+  loadEnvironmentVariables() {
+    try {
+      const stored = localStorage.getItem('api-docs-env-vars');
+      if (stored) {
+        this.environmentVariables = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn('Failed to load environment variables for API tester:', e);
+      this.environmentVariables = [];
+    }
+  }
+
+  // Method to refresh environment variables (can be called from outside)
+  refreshEnvironmentVariables() {
+    this.loadEnvironmentVariables();
   }
 
   bindEvents() {
@@ -610,6 +632,22 @@ class ApiTesterManager {
       });
     }
 
+    // Add header button
+    const addHeaderBtn = document.getElementById('addHeaderBtn');
+    if (addHeaderBtn) {
+      addHeaderBtn.addEventListener('click', () => {
+        this.addHeaderRow();
+      });
+    }
+
+    // Add query parameter button
+    const addQueryBtn = document.getElementById('addQueryBtn');
+    if (addQueryBtn) {
+      addQueryBtn.addEventListener('click', () => {
+        this.addQueryRow();
+      });
+    }
+
     // Close panel when clicking outside
     document.addEventListener('click', (e) => {
       if (this.panel && this.panel.classList.contains('open') && 
@@ -630,12 +668,16 @@ class ApiTesterManager {
   openPanel(button) {
     const method = button.dataset.method.toUpperCase();
     const path = button.dataset.path;
+    const endpointId = button.dataset.endpointId;
+    
+    // Store current endpoint reference
+    this.currentEndpoint = { method, path, endpointId };
     
     // Update panel title with endpoint info
     this.updatePanelTitle(method, path);
     
-    // Populate panel with endpoint data
-    this.populatePanel(method, path);
+    // Populate panel with endpoint data from DOM
+    this.populatePanel(method, path, endpointId);
     
     // Show panel
     this.panel.classList.add('open');
@@ -672,26 +714,39 @@ class ApiTesterManager {
     }
   }
 
-  populatePanel(method, path) {
+  populatePanel(method, path, endpointId) {
     // Set method
     const methodSelect = document.getElementById('requestMethod');
     if (methodSelect) {
       methodSelect.value = method;
     }
 
-    // Set URL
+    // Set URL with variable replacement
     const urlInput = document.getElementById('requestUrl');
     if (urlInput) {
       const baseUrl = window.location.origin;
-      urlInput.value = `${baseUrl}${path}`;
+      const fullUrl = `${baseUrl}${path}`;
+      urlInput.value = this.replaceUrlVariables(fullUrl);
     }
 
-    // Show/hide query section based on method
+    // Find endpoint data from DOM
+    const endpointData = this.extractEndpointDataFromDOM(endpointId);
+    
+    // Populate headers table
+    this.populateHeadersTable(endpointData.headers);
+    
+    // Populate query parameters table
+    this.populateQueryTable(endpointData.parameters);
+    
+    // Pre-fill request body
+    this.populateRequestBody(endpointData.requestBody);
+
+    // Show/hide sections based on method
     const querySection = document.getElementById('querySection');
     const bodySection = document.querySelector('.body-section');
     
     if (querySection && bodySection) {
-      if (method === 'GET') {
+      if (method === 'GET' || method === 'DELETE') {
         querySection.style.display = 'block';
         bodySection.style.display = 'none';
       } else {
@@ -701,10 +756,257 @@ class ApiTesterManager {
     }
   }
 
+  extractEndpointDataFromDOM(endpointId) {
+    // Find the endpoint section in the DOM
+    const endpointSection = document.getElementById(endpointId);
+    if (!endpointSection) {
+      return { headers: [], parameters: [], requestBody: null };
+    }
+
+    const data = { headers: [], parameters: [], requestBody: null };
+
+    // Extract request headers from detail sections
+    const detailSections = endpointSection.querySelectorAll('.detail-section');
+    detailSections.forEach(section => {
+      const title = section.querySelector('.detail-title');
+      if (title && title.textContent.includes('Request Headers')) {
+        const codeBlock = section.querySelector('.code-block');
+        if (codeBlock) {
+          try {
+            const headersText = codeBlock.textContent.trim();
+            if (headersText) {
+              const headersObj = JSON.parse(headersText);
+              data.headers = Object.entries(headersObj).map(([key, value]) => ({ key, value }));
+            }
+          } catch (e) {
+            console.warn('Failed to parse request headers:', e);
+          }
+        }
+      }
+      
+      if (title && title.textContent.includes('Request Body')) {
+        const codeBlock = section.querySelector('.code-block');
+        if (codeBlock) {
+          try {
+            const bodyText = codeBlock.textContent.trim();
+            if (bodyText) {
+              data.requestBody = JSON.parse(bodyText);
+            }
+          } catch (e) {
+            // If it's not valid JSON, keep as string
+            data.requestBody = codeBlock.textContent.trim();
+          }
+        }
+      }
+    });
+
+    // Extract parameters from table
+    const paramsTable = endpointSection.querySelector('.params-table tbody');
+    if (paramsTable) {
+      const rows = paramsTable.querySelectorAll('tr');
+      data.parameters = Array.from(rows).map(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) {
+          return {
+            name: cells[0].textContent.trim(),
+            type: cells[1].textContent.trim(),
+            in: cells[2].textContent.trim(),
+            required: cells[3].textContent.trim() === 'Yes',
+            description: cells[4].textContent.trim()
+          };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+
+    return data;
+  }
+
+  populateHeadersTable(headers = []) {
+    const headersForm = document.getElementById('headersForm');
+    if (!headersForm) return;
+
+    // Clear existing headers
+    headersForm.innerHTML = '';
+
+    // Add default headers if any exist in the endpoint
+    headers.forEach(header => {
+      this.addHeaderRow(header.key, this.replaceDoubleVariables(header.value));
+    });
+
+    // Add common default headers if none exist
+    if (headers.length === 0) {
+      this.addHeaderRow('Content-Type', 'application/json');
+      this.addHeaderRow('Authorization', '{{API_TOKEN}}');
+    }
+  }
+
+  populateQueryTable(parameters = []) {
+    const queryForm = document.getElementById('queryForm');
+    if (!queryForm) return;
+
+    // Clear existing parameters
+    queryForm.innerHTML = '';
+
+    // Add query parameters
+    const queryParams = parameters.filter(param => param.in === 'query');
+    queryParams.forEach(param => {
+      const defaultValue = param.required ? '' : `{{${param.name.toUpperCase()}}}`;
+      this.addQueryRow(param.name, defaultValue, param.description);
+    });
+  }
+
+  populateRequestBody(requestBody) {
+    const bodyTextarea = document.getElementById('requestBody');
+    if (!bodyTextarea) return;
+
+    if (requestBody) {
+      let bodyText;
+      if (typeof requestBody === 'object') {
+        bodyText = JSON.stringify(requestBody, null, 2);
+      } else {
+        bodyText = requestBody;
+      }
+      
+      // Apply variable replacement for double brackets
+      bodyText = this.replaceDoubleVariables(bodyText);
+      bodyTextarea.value = bodyText;
+    } else {
+      bodyTextarea.value = '';
+    }
+  }
+
+  addHeaderRow(key = '', value = '', description = '') {
+    const headersForm = document.getElementById('headersForm');
+    if (!headersForm) return;
+
+    const headerRow = document.createElement('div');
+    headerRow.className = 'header-row';
+    headerRow.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    `;
+
+    headerRow.innerHTML = `
+      <input type="text" class="header-key" placeholder="Header Name" value="${this.escapeHtml(key)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem;">
+      <input type="text" class="header-value" placeholder="Header Value" value="${this.escapeHtml(value)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem; font-family: 'Fira Code', monospace;">
+      <button type="button" class="remove-header-btn" style="padding: 0.5rem; border: none; background: none; cursor: pointer; color: #ef4444; font-size: 0.875rem;" title="Remove Header">🗑️</button>
+    `;
+
+    // Add remove functionality
+    headerRow.querySelector('.remove-header-btn').addEventListener('click', () => {
+      headerRow.remove();
+    });
+
+    headersForm.appendChild(headerRow);
+  }
+
+  addQueryRow(key = '', value = '', description = '') {
+    const queryForm = document.getElementById('queryForm');
+    if (!queryForm) return;
+
+    const queryRow = document.createElement('div');
+    queryRow.className = 'query-row';
+    queryRow.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    `;
+
+    queryRow.innerHTML = `
+      <input type="text" class="query-key" placeholder="Parameter Name" value="${this.escapeHtml(key)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem;">
+      <input type="text" class="query-value" placeholder="Parameter Value" value="${this.escapeHtml(value)}" style="padding: 0.5rem; border: 1px solid var(--light-border); border-radius: 4px; font-size: 0.75rem; font-family: 'Fira Code', monospace;" title="${this.escapeHtml(description)}">
+      <button type="button" class="remove-query-btn" style="padding: 0.5rem; border: none; background: none; cursor: pointer; color: #ef4444; font-size: 0.875rem;" title="Remove Parameter">🗑️</button>
+    `;
+
+    // Add remove functionality
+    queryRow.querySelector('.remove-query-btn').addEventListener('click', () => {
+      queryRow.remove();
+    });
+
+    queryForm.appendChild(queryRow);
+  }
+
+  // Variable replacement for URLs (single brackets {})
+  replaceUrlVariables(url) {
+    return url.replace(/\{([^}]+)\}/g, (match, varName) => {
+      const envVar = this.environmentVariables.find(v => v.key === varName);
+      return envVar ? envVar.value : match;
+    });
+  }
+
+  // Variable replacement for body/headers/params (double brackets {{}})
+  replaceDoubleVariables(text) {
+    if (typeof text !== 'string') return text;
+    
+    return text.replace(/\{\{([^}]+)\}\}/g, (match, varName) => {
+      const envVar = this.environmentVariables.find(v => v.key === varName);
+      return envVar ? envVar.value : match;
+    });
+  }
+
+  // Collect headers from the form
+  collectHeaders() {
+    const headers = {};
+    const headerRows = document.querySelectorAll('.header-row');
+    
+    headerRows.forEach(row => {
+      const keyInput = row.querySelector('.header-key');
+      const valueInput = row.querySelector('.header-value');
+      
+      if (keyInput && valueInput && keyInput.value.trim() && valueInput.value.trim()) {
+        const key = keyInput.value.trim();
+        const value = this.replaceDoubleVariables(valueInput.value.trim());
+        headers[key] = value;
+      }
+    });
+
+    return headers;
+  }
+
+  // Collect query parameters from the form
+  collectQueryParams() {
+    const params = new URLSearchParams();
+    const queryRows = document.querySelectorAll('.query-row');
+    
+    queryRows.forEach(row => {
+      const keyInput = row.querySelector('.query-key');
+      const valueInput = row.querySelector('.query-value');
+      
+      if (keyInput && valueInput && keyInput.value.trim() && valueInput.value.trim()) {
+        const key = keyInput.value.trim();
+        const value = this.replaceDoubleVariables(valueInput.value.trim());
+        params.append(key, value);
+      }
+    });
+
+    return params;
+  }
+
   async sendRequest() {
     const method = document.getElementById('requestMethod').value;
-    const url = document.getElementById('requestUrl').value;
+    let url = document.getElementById('requestUrl').value;
     const bodyText = document.getElementById('requestBody').value;
+
+    // Apply URL variable replacement
+    url = this.replaceUrlVariables(url);
+
+    // Collect headers
+    const headers = this.collectHeaders();
+
+    // Collect query parameters for GET requests
+    if (method === 'GET' || method === 'DELETE') {
+      const queryParams = this.collectQueryParams();
+      if (queryParams.toString()) {
+        const separator = url.includes('?') ? '&' : '?';
+        url += separator + queryParams.toString();
+      }
+    }
 
     // Show loading state
     const sendButton = document.getElementById('sendRequestBtn');
@@ -715,19 +1017,24 @@ class ApiTesterManager {
     try {
       const requestOptions = {
         method: method,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: headers
       };
 
       // Add body for non-GET requests
-      if (method !== 'GET' && bodyText.trim()) {
-        try {
-          JSON.parse(bodyText); // Validate JSON
-          requestOptions.body = bodyText;
-        } catch (e) {
-          this.showError('Invalid JSON in request body');
-          return;
+      if (method !== 'GET' && method !== 'DELETE' && bodyText.trim()) {
+        let processedBody = this.replaceDoubleVariables(bodyText);
+        
+        // If it looks like JSON, validate it
+        if (processedBody.trim().startsWith('{') || processedBody.trim().startsWith('[')) {
+          try {
+            JSON.parse(processedBody); // Validate JSON
+            requestOptions.body = processedBody;
+          } catch (e) {
+            this.showError('Invalid JSON in request body after variable replacement');
+            return;
+          }
+        } else {
+          requestOptions.body = processedBody;
         }
       }
 
@@ -860,4 +1167,16 @@ class ApiTesterManager {
       }
     }, 300);
   }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 } 
+// Initialize the application when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
