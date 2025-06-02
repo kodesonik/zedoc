@@ -1,4 +1,4 @@
-# @kodesonik/zedoc
+# Zedoc
 
 A comprehensive NestJS library for generating beautiful, interactive API documentation with advanced theming, environment variables, and professional testing capabilities.
 
@@ -20,7 +20,7 @@ A comprehensive NestJS library for generating beautiful, interactive API documen
 ### Installation
 
 ```bash
-npm install @kodesonik/zedoc
+npm install zedoc
 ```
 
 ### Basic Setup (Swagger Mode)
@@ -29,7 +29,7 @@ For automatic documentation extraction from Swagger decorators:
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { ZedocModule } from '@kodesonik/zedoc';
+import { ZedocModule } from 'zedoc';
 
 @Module({
   imports: [
@@ -62,7 +62,7 @@ export class AppModule {}
 ```typescript
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ZedocModule } from '@kodesonik/zedoc';
+import { ZedocModule } from 'zedoc';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -520,11 +520,11 @@ The new unified architecture maintains backward compatibility:
 
 ```typescript
 // v1.x - Still works
-import { StructuredZedocModule } from '@kodesonik/zedoc';
+import { StructuredZedocModule } from 'zedoc';
 StructuredZedocModule.forRoot({ sections: [...] })
 
 // v2.x - Recommended
-import { ZedocModule } from '@kodesonik/zedoc';
+import { ZedocModule } from 'zedoc';
 ZedocModule.forRoot({ sections: [...] })  // Auto-detects structured mode
 ```
 
