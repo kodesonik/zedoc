@@ -73,7 +73,7 @@ export class ZedocModule {
    * Helper method to set the Swagger document (for Swagger mode)
    * Call this after setting up Swagger in your application
    */
-  static setSwaggerDocument(app: any, document: any, config: DocumentationConfig): void {
+  static setSwaggerDocument(app: any, document: any): void {
     try {
       const swaggerService = app.get(SwaggerIntegrationService);
       if (swaggerService) {

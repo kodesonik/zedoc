@@ -1,8 +1,9 @@
-import { Controller, Get, Res, Query } from '@nestjs/common';
+import { Controller, Get, Res, Query, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { DocumentationService } from '../services/documentation.service';
 import { SwaggerIntegrationService } from '../services/swagger-integration.service';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { NoAuthGuard } from 'src/guards/no-auth.guard';
 
 @ApiTags('Documentation')
 @Controller('zedoc')
@@ -12,6 +13,7 @@ export class DocumentationController {
     private readonly swaggerIntegrationService: SwaggerIntegrationService,
   ) {}
 
+  @UseGuards(NoAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get unified API documentation' })
   @ApiQuery({ name: 'theme', required: false, enum: ['light', 'dark'], description: 'Theme mode for the documentation' })
@@ -60,6 +62,7 @@ export class DocumentationController {
     }
   }
 
+  @UseGuards(NoAuthGuard)
   @Get('config')
   @ApiOperation({ summary: 'Get current configuration' })
   async getConfig(@Res() res: Response): Promise<void> {
@@ -99,6 +102,7 @@ export class DocumentationController {
     }
   }
 
+  @UseGuards(NoAuthGuard)
   @Get('json')
   @ApiOperation({ summary: 'Get Swagger JSON (Swagger mode only)' })
   async getSwaggerJson(@Res() res: Response): Promise<void> {
