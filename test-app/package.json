@@ -1,6 +1,6 @@
 {
   "name": "zedoc-test-app",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Test application for @kodesonik/zedoc library",
   "author": "",
   "private": true,
