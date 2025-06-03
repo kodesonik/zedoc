@@ -121,20 +121,4 @@ export class ZedocModule {
       console.warn('⚠️ Could not configure Zedoc:', error.message);
     }
   }
-
-  static setup(app: any, config: DocumentationConfig): void {
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle(config.title)
-      .setDescription(config.description)
-      .setVersion(config.version)
-      .build();
-
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-
-    ZedocModule.setSwaggerDocument(app, document, config);
-
-    ZedocModule.configure(app, config);
-    
-    ZedocModule.forRoot(config);
-  }
 } 
