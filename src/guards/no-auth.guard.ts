@@ -5,7 +5,7 @@ import { Reflector } from '@nestjs/core';
 export class NoAuthGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     return true;
   }
 }
