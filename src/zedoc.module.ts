@@ -8,6 +8,7 @@ import { EnvironmentService } from './services/environment.service';
 import { BrandingService } from './services/branding.service';
 import { DocumentationController } from './controllers/documentation.controller';
 import { DocumentationConfig } from './interfaces/documentation.interface';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 @Module({})
 export class ZedocModule {
@@ -72,7 +73,7 @@ export class ZedocModule {
    * Helper method to set the Swagger document (for Swagger mode)
    * Call this after setting up Swagger in your application
    */
-  static setSwaggerDocument(app: any, document: any): void {
+  static setSwaggerDocument(app: any, document: any, config: DocumentationConfig): void {
     try {
       const swaggerService = app.get(SwaggerIntegrationService);
       if (swaggerService) {
@@ -88,7 +89,7 @@ export class ZedocModule {
    * Helper method to set Swagger document from URL or file path
    * Call this to load external Swagger documents
    */
-  static async setSwaggerJson(app: any, source: string, options?: {
+  static async setSwaggerJson(app: any, source: string, config: DocumentationConfig, options?: {
     timeout?: number;
     headers?: Record<string, string>;
     encoding?: BufferEncoding;
@@ -119,5 +120,21 @@ export class ZedocModule {
     } catch (error) {
       console.warn('⚠️ Could not configure Zedoc:', error.message);
     }
+  }
+
+  static setup(app: any, config: DocumentationConfig): void {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle(config.title)
+      .setDescription(config.description)
+      .setVersion(config.version)
+      .build();
+
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+    ZedocModule.setSwaggerDocument(app, document, config);
+
+    ZedocModule.configure(app, config);
+    
+    ZedocModule.forRoot(config);
   }
 } 
