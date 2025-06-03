@@ -8,6 +8,7 @@ import { EnvironmentService } from './services/environment.service';
 import { BrandingService } from './services/branding.service';
 import { DocumentationController } from './controllers/documentation.controller';
 import { DocumentationConfig } from './interfaces/documentation.interface';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 @Module({})
 export class ZedocModule {
@@ -88,7 +89,7 @@ export class ZedocModule {
    * Helper method to set Swagger document from URL or file path
    * Call this to load external Swagger documents
    */
-  static async setSwaggerJson(app: any, source: string, options?: {
+  static async setSwaggerJson(app: any, source: string, config: DocumentationConfig, options?: {
     timeout?: number;
     headers?: Record<string, string>;
     encoding?: BufferEncoding;
